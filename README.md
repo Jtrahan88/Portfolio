@@ -4,3 +4,12 @@
 
 
 #                           **in progress**
+
+
+#TODO: Import openpyxl, pandas, numpy
+
+
+
+
+
+#TODO: Open and read the excel files i need start with main file. add adtional files later
