@@ -1,17 +1,14 @@
-# DisasterWork_Python
-#This will be the updated Python verision from https://github.com/Jtrahan88/DisasterWork_VBA.git
-
-
-
-# Python3
-# read Smart Sheets file download - unknown how this will read(practicing for work audits)
+# ! Python3
+# read Smart Sheets file download - unknown how this will read(practice lesson)
 
 #                           **in progress**
-#Additonal ideas to make this better after orginal product works:
-#TODO: Have a windown open and i can ut multiple excel files to be read or
+#TODO: Additonal ideas to make this better after orginal product works correctly:
+
+#TODO: step 2 Have a windown open and i can ut multiple excel files to be read or
 # or
 #TODO: an input box where we can type it in each file.
 
+#TODO: step 9 Eventually I would like like to look at the ID and plot out the difference with the why in a new worksheet
 
 # Step 1
 
@@ -57,20 +54,25 @@ sheet = wb['']#PUT THE SHEET NAME HERE.Now we can call on that sheet to work wit
 # plus many others
 
 # SA headings we need: APN, Date Completed, Automobiles
+# in Smart Sheets the above headings read as: APN, Date Completed, Automobiles
+# ***This is very important because other tracker labeled aspect different than the main Smart Sheet racker*****
+
+
+
+# Step 8*
+
+#TODO: This step could be included with step 5
+#we have to get all the data from multiple worksheets  compare to the audit work sheet
+
+
+
+# Step 9
+
+#TODO: set up a vlookup or hlookup to use the ID(APNs in our aduit sheet to grab the iform  SS and SA sheets
+# and put both outputs in the audit sheet.
+# 1st just putting them side by side is fine. Maybe highlgh any differences.
+# Evenutally i would like like to look at the ID and plot out the difference with the why in a new worksheet
 
 
 
 
-
-
-
-
-
-# we can now us our sheet variable to pul data from the sheet as we need
-
-sheet = workbook["Northern Branch Phase II Debris"]
-
-
-
-
-# TODO: Copy aolumn A (APNs) to a new workbook
