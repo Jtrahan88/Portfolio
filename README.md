@@ -16,23 +16,31 @@
 # TODO: see if we can use and import pandas, numpy, malplot
 import openpyxl
 
+#TODO: this variable will not work in opening the file. Find out why.>>>>>>>>>>>>>>>>>>>. DONE
+excelWorkbook = "Northern Branch Phase II Debris Removal Ops.xlsx" # BE SURE TO FILL IN FILE NAME NEEDS TO HAVE .XLSX AT THE END OF FILE NAME
+
 # Step 2
 
 # have python open the excel file in question. We need to have it downloaded
 #TODO: Get this from the dowloads folder. Lastest version downloaded.
 print("Opening workbook...")  #read( or open) the Spread Sheet Data in python
-wb = openpyxl.load_workbook('PUT EXCEL FILE NAME HERE')# BE SURE TO FILL IN FILE NAME NEEDS TO HAVE .XLSX AT THE END OF FILE NAME
+wb = openpyxl.load_workbook(excelWorkbook) # Workbook name variable goes here. named the the open file wb
 
 # Step 3(optional)
 
 # now we need to select the work sheet(s) we may need.
 # here to print out our worksheet names, so we do not have to open work book
-# print(workbook.worksheets) # take off # so see what worksheets are in excel. This is not needed for program to work
+print(wb.worksheets) # take off # so see what worksheets are in excel. This is not needed for program to work
+
+# after running here are our worksheet names: [<Worksheet "Northern Branch Phase II Debris">, <Worksheet "Comments">, <Worksheet "Summary">]
+
+# we will use  "Worksheet "Northern Branch Phase II Debris"
+
 
 # Step 4
 
 # TODO: select worksheet we will start to work with
-sheet = wb['']#PUT THE SHEET NAME HERE.Now we can call on that sheet to work with.
+#sheet = wb['']#PUT THE SHEET NAME HERE.Now we can call on that sheet to work with.
 
 # Step 5
 
