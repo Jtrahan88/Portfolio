@@ -1,0 +1,79 @@
+#TODO:
+# FROM SS: ---> SIDE BY SIDE COMPARISON
+#  GET TOTAL VEHICLE COUNTS AND VEHICLES REMOVED COUNTS FOR EACH COUNTY
+#  WE NEED TO ALSO SHOW STREET #, ADDRESS, DEBRIS REMOVAL DATE
+#  Show any mismatch(highlight them, make them pop out in a table with reason, etc)
+
+
+#TODO: Documentation locations:
+# pandas:  https://pandas.pydata.org/pandas-docs/stable/
+# matplotlib: https://matplotlib.org/stable/api/_as_gen/matplotlib.pyplot.html
+# openpyxl:
+# numpy:
+import pandas as pd
+import openpyxl
+import matplotlib.pyplot as plt
+import numpy as np
+
+#TODO: make this so I do not have to manually enter it. This Sheet is constanly changing. Maybe webscraping?
+# Workbook variable
+workbookName = "Northern Branch Phase II Debris Removal Ops (52).xlsx"
+
+print("Opening Vehicle check program.....")
+df = pd.read_excel(workbookName, engine="openpyxl")
+
+#TODO: Total vehicle count check. We need to do comparisions with/before this part.
+def getTotalVehicleCount(df):
+    county = df.groupby(['County']).count() # this will put county on why access and count all the field beloging to each count on the column we want
+    counts = county.loc[:, "Number of Vehicles"] # left side : eans all row, right side is the column we want to look at.
+
+    counts.plot(kind='bar')
+    plt.title('Total Vehicle Removal Counts By County')
+    plt.xlabel("Counties") # labels the X-Axis on our graph
+    plt.ylabel('Vehicles Removed') # labels the Y-Axis on our graph
+    plt.legend()  # add a legend for our graph
+    #plt.xticks([1,2,3]) # change to x tick vlues and how much they go or down by
+    #plt.yticks([1,2,3]) # change to y tick vlues and how much they go or down by
+
+
+
+    plt.show() # show or print out the graph to view
+    print(df[["County", "Number of Vehicles"]].groupby("County").count())  # gets total vehicle counts by county
+print(getTotalVehicleCount(df))
+
+
+
+
+
+
+# print(df.columns.tolist()) # grab each column heading we need I used this due to not wanting to open excel
+# and my dataset is to big that pycharm will not display the full column heading names ulist i put it in a list* as of now**
+#TODO: columns we will use:
+# APN | Street # | Street Name | Number of Vehicles | Number of Vehicles Removed | Debris Finish | County
+# 'APN', 'Street #', 'Street Name', 'Number of Vehicles', 'Number of Vehicles Removed', 'Debris Finish', 'County'
+
+#TODO: Make a function that; get all the columns we need and compare to other excell sheet(s)
+# Rearrange column orders:
+# cols = list(df.columns.values)
+# df = df[['APN', 'Street #', 'Street Name', 'Number of Vehicles', 'Number of Vehicles Removed', 'Debris Finish', 'County']]
+# df.to_excel("Test.xlsx") #saves to a new excel file
+# df.to_excel("Test.xlsx", index= False) #saves to a new excel file with no index column
+
+
+#testing grabing certain coulmns values for two different columns.  #TODO: cant get it to work yet
+# Example (df['Street Name'] == 'Gamble Road') & (df['Number of Vehicles Removed'] > 0)
+# test = df.loc[(df['Street Name'] == 'Gamble Road') & (df['County'] == 'Nevada')]
+# print(test)
+
+
+
+
+
+
+
+
+
+
+
+
+
