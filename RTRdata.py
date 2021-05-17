@@ -48,10 +48,10 @@ pd.options.display.max_columns = None
 # voidFalse = ['Is Void'] == False
 # serviceCode4 = ['Service Code'] == '4'
 # serviceCodeC04 = ['Service Code']== 'CO4'
-serviceCode = dfRTR["Service Code"].isin(["CO4 ", "4"])]
- filt = dfRTR[(dfRTR['Is Void'] == False) & (dfRTR["Service Code"].isin(["CO4 ", "4"]))]
+# serviceCode = dfRTR["Service Code"].isin(["CO4 ", "4"])]
+filt = dfRTR[(dfRTR['Is Void'] == False) & (dfRTR["Service Code"].isin(["CO4 ", "4"]))] # .isin was the key for this. MAKE A YOUTUBE ON THIS 5+hrs to figure this out. 
 
-print(filt)
+filt.to_excel('VecTest.xlsx')
 
 #  filter out(delete) all True vales under the Is Void column
 #  Figure out the weird APNs(In Zone Name), by hard coding, what they need to look like.
