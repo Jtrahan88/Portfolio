@@ -50,8 +50,6 @@ def vehicleCols(df):
 
 
 
-# print(findAPN.loc['044-010-064-000'])
-
 # TODO: Function for total vehicle counts after checks. Graph for display*. ******************We need to do comparisions with/before this part******************.
 def getTotalVehicleCount(dfSS): # this is for after everything was checked and QC'ed
     county = dfSS.groupby(['County']).count()  # this will put county on Y-Axis and count all the values belonging to each count on the column we want
@@ -70,7 +68,7 @@ def getTotalVehicleCount(dfSS): # this is for after everything was checked and Q
     # plt.yticks([1,2,3]) # change to y tick values and how much they go or down by
 
     plt.show()  # show or print out the graph to view
-    print(dfSS[["County", "Number of Vehicles"]].groupby("County").count())  # gets total vehicle counts by county on screen for copy/check(optional)
+    print(dfSS[["County", "Number of Vehicles"]].groupby("County").count())  # gets total vehicle counts by county display on screen for copy/check(optional)
 
 
 # print(getTotalVehicleCount(dfSS)) # test function
