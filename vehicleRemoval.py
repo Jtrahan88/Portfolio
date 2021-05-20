@@ -79,25 +79,7 @@ def getTotalCounts(dfSS): # this function is for getting counts by any way you n
 
 
 
-#TODO: How to get counts for anything
-def RikaChecks(dfSS):
-    groupbyCheck = df.groupby('County').count()
-    whatWeAreCounting = groupbyCheck.loc[:,["Haz Trees"]]  #"ROE Verified", "Withdrawal", "Not Eligible", 'Hold', "Site Assessment", "ASB Assessment"]]
-    # whatWeAreCounting.to_excel("RikaTest.xlsx")
 
-
-    #Graph it: #TODO:graph doesnt work yet
-    # whatWeAreCounting.plot(kind='bar', x="groupbyCheck", y="whatWeAreCounting")
-    # Get our numbers at the top of our bar chart
-    # for i in range(len(groupbyCheck)):
-    #     plt.text(i, whatWeAreCounting[i], whatWeAreCounting[i], ha='center', va = 'bottom')
-    # plt.show()
-    print(whatWeAreCounting)
-
-
-
-
-RikaChecks(dfSS)
 
 
 
