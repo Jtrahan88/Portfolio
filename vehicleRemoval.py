@@ -21,30 +21,37 @@ import pandas as pd
 import openpyxl
 import matplotlib.pyplot as plt
 import numpy as np
-from tkinter import Tk
-from tkinter.filedialog import askopenfile
+# from tkinter import Tk
+# from tkinter.filedialog import askopenfile
 
 
-#TODO: SS Excel Name: make this so I do not have to manually enter it. This Sheet is constanly changing. Maybe webscraping?
+#TODO: SS Excel Name:
+# make this so I do not have to manually enter it. This Sheet is constanly changing. Maybe webscraping?
 # Smart Sheets Workbook variable
-fileNameSS = "Northern Branch Phase II Debris Removal Ops 05-18-2021.xlsx"
+fileNameSS = "Northern Branch Phase II Debris Removal Ops (52).xlsx"
 
 
 print("Opening Vehicle check program.....")
-dfSS = pd.read_excel(fileNameSS,usecols= ['APN','Street #', 'Street Name','Debris Finish', 'Number of Vehicles',
+dfSS = pd.read_excel(fileNameSS, usecols=['APN','Street #', 'Street Name','Debris Finish', 'Number of Vehicles',
                                           'Number of Vehicles Removed',  'County'], index_col='APN')
-pd.options.display.width= None #only way to display all columns and rows for my data set 2500cols x 119rows
+ # inplace=True to make it permanent
+
+#only way to display all columns and rows for my data set 2500 rows x 119 columns
+pd.options.display.width= None
 pd.set_option('display.max_rows', 3000)
 pd.set_option('display.max_columns', 3000)
 pd.options.display.max_columns= None
 #TODO: how to make open and close file more automated*
-#  # df.reset_index(inplace=True) #This will reset the index back to numbers
+#  # dfSS.reset_index(inplace=True) #This will reset the index back to numbers
+
+#TODO: filtering data
+
 
 # TODO: Save sheet to excel file for us
-def vehicleCols(df):
-    df.to_excel("VehicleColumns.xlsx")  # saves to a new excel file
-    return df
-vehicleCols(df)
+def vehicleCols(dfSS):
+    dfSS.to_excel("VehicleColumns.xlsx")  # saves to a new excel file
+    return dfSS
+vehicleCols(dfSS)
 
 
 
@@ -53,11 +60,9 @@ vehicleCols(df)
 
 
 
-
-
 # TODO: Grahphing (WIP)
 def getTotalCounts(dfSS): # this function is for getting counts by any way you need.
-    county = df.groupby(['County']).count()  # this will put "COUNTY"on Y-Axis and counts all the values from other columns
+    county = dfSS.groupby(['County']).count()  # this will put "COUNTY"on Y-Axis and counts all the values from other columns
     counts = county.loc[:,"Number of Vehicles Removed"]  # left side :  all rows , right side: is the column we want to look at. This is how we chose what we want to ount up
     # counts.to_excel("test3.xlsx") # if we use county we get counts for entier data set columns by county, if we use counts.to_excel() we only get vec removed column.
 
@@ -80,6 +85,10 @@ def getTotalCounts(dfSS): # this function is for getting counts by any way you n
 
 
 # getTotalCounts(dfSS) # test function
+
+
+
+
 
 
 
