@@ -40,12 +40,24 @@ pd.options.display.max_columns= None
 #TODO: how to make open and close file more automated*
 #  # df.reset_index(inplace=True) #This will reset the index back to numbers
 
+# TODO: Save sheet to excel file for us
+def vehicleCols(df):
+    df.to_excel("VehicleColumns.xlsx")  # saves to a new excel file
+    return df
+vehicleCols(df)
 
 
 
-# TODO: Function for total vehicle counts after checks. Graph for display*. ******************We need to do comparisions with/before this part******************.
+#TODO: V or xlookups
+
+
+
+
+
+
+# TODO: Grahphing (WIP)
 def getTotalCounts(dfSS): # this function is for getting counts by any way you need.
-    county = dfSS.groupby(['County']).count()  # this will put "COUNTY"on Y-Axis and counts all the values from other columns
+    county = df.groupby(['County']).count()  # this will put "COUNTY"on Y-Axis and counts all the values from other columns
     counts = county.loc[:,"Number of Vehicles Removed"]  # left side :  all rows , right side: is the column we want to look at. This is how we chose what we want to ount up
     # counts.to_excel("test3.xlsx") # if we use county we get counts for entier data set columns by county, if we use counts.to_excel() we only get vec removed column.
 
@@ -55,18 +67,19 @@ def getTotalCounts(dfSS): # this function is for getting counts by any way you n
     for i in range(len(county)): # for loop for each element in the lenth of counties, display the height of each row center and at the top of the repectiv bar chart.
         plt.text(i, counts[i], counts[i], ha='center', va='bottom') #i for each index. [i] for the height of counts(the bar/number og vehicles removed)
         # the 2nd count[i] is for numbers but we can put text there
-
+    #TODO: Lables for graph
     plt.title('Total Vehicle Removal Counts By County') #title the bar chart
     plt.xlabel("Counties")  # labels the X-Axis on our graph
     plt.ylabel('Vehicles Removed')  # labels the Y-Axis on our graph
     plt.legend()  # add a legend for our graph
     # plt.xticks([1,2,3]) # change to x tick values and how much they go or down by
     # plt.yticks([1,2,3]) # change to y tick values and how much they go or down by
-    print(dfSS[["County", "Number of Vehicles Removed"]].groupby("County").count())
+
     plt.show()  # show or print out the graph to view
+    print(dfSS[["County", "Number of Vehicles Removed"]].groupby("County").count())  # gets total vehicle counts by county display on screen for copy/check(optional)
 
 
-getTotalCounts(dfSS) # test function
+# getTotalCounts(dfSS) # test function
 
 
 
