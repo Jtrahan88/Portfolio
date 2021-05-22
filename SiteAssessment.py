@@ -13,23 +13,25 @@ df = pd.read_excel(SAdf, header=1, usecols=['APN','ST No.', 'Unit No.', 'ST Addr
 # pd.set_option('display.max_rows', 2200)
 # pd.set_option('display.max_columns', 2200)
 
+
+
+
+
+
 #TODO: Make this a GUI
 def chooseYourAPN():
     userInput = input("What APN To search For: ")
     if userInput == '':
-        print("Finished")
+        print("\n~Finished~")
     elif userInput not in df.index:
-        print("No APN Found")
+        print("No APN Found\n")
         chooseYourAPN()
     else:
         print(df.loc[userInput])
         chooseYourAPN()
 
 
-chooseYourAPN()
+# chooseYourAPN()
 
 
 
-
-# df.to_excel("test.xlsx")
-# df.to_excel("test.xlsx")
