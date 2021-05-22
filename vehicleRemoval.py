@@ -27,14 +27,12 @@ from tkinter.filedialog import askopenfile
 
 #TODO: SS Excel Name: make this so I do not have to manually enter it. This Sheet is constanly changing. Maybe webscraping?
 # Smart Sheets Workbook variable
-fileNameSS = "Northern Branch Phase II Debris Removal Ops (1).xlsx"
+fileNameSS = "Northern Branch Phase II Debris Removal Ops 05-18-2021.xlsx"
 
 
 print("Opening Vehicle check program.....")
-dfSS = pd.read_excel(fileNameSS, engine="openpyxl") # opens Smartsheets excell refered to as dfSS #TODO: index_col='APN' make this happen-doesn't work
-df= dfSS.set_index('APN') # puts APN as INDEX we can add , inplace=True to make it permanent
-
-
+dfSS = pd.read_excel(fileNameSS,usecols= ['APN','Street #', 'Street Name','Debris Finish', 'Number of Vehicles',
+                                          'Number of Vehicles Removed',  'County'], index_col='APN')
 pd.options.display.width= None #only way to display all columns and rows for my data set 2500cols x 119rows
 pd.set_option('display.max_rows', 3000)
 pd.set_option('display.max_columns', 3000)
@@ -43,17 +41,11 @@ pd.options.display.max_columns= None
 #  # df.reset_index(inplace=True) #This will reset the index back to numbers
 
 
-# TODO: Filter function columns we will use for comparing excel sheets
-def vehicleCols(df):
-    df = df[['Street #', 'Street Name','Debris Finish', 'Number of Vehicles', 'Number of Vehicles Removed',  'County']] # filters a list, and orders of columns. index not needed
-    df.to_excel("VehicleColumns.xlsx")  # saves to a new excel file
-    return df
-
 
 
 # TODO: Function for total vehicle counts after checks. Graph for display*. ******************We need to do comparisions with/before this part******************.
 def getTotalCounts(dfSS): # this function is for getting counts by any way you need.
-    county = df.groupby(['County']).count()  # this will put "COUNTY"on Y-Axis and counts all the values from other columns
+    county = dfSS.groupby(['County']).count()  # this will put "COUNTY"on Y-Axis and counts all the values from other columns
     counts = county.loc[:,"Number of Vehicles Removed"]  # left side :  all rows , right side: is the column we want to look at. This is how we chose what we want to ount up
     # counts.to_excel("test3.xlsx") # if we use county we get counts for entier data set columns by county, if we use counts.to_excel() we only get vec removed column.
 
@@ -70,13 +62,11 @@ def getTotalCounts(dfSS): # this function is for getting counts by any way you n
     plt.legend()  # add a legend for our graph
     # plt.xticks([1,2,3]) # change to x tick values and how much they go or down by
     # plt.yticks([1,2,3]) # change to y tick values and how much they go or down by
-
+    print(dfSS[["County", "Number of Vehicles Removed"]].groupby("County").count())
     plt.show()  # show or print out the graph to view
-    print(dfSS[["County", "Number of Vehicles Removed"]].groupby("County").count())  # gets total vehicle counts by county display on screen for copy/check(optional)
 
 
-# getTotalCounts(dfSS) # test function
-
+getTotalCounts(dfSS) # test function
 
 
 
