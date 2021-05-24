@@ -2,10 +2,10 @@ import pandas as pd
 import numpy as np
 
 
-SAdf = 'TT_North Branch_Site Assessment.xlsx'
+SAdf = 'TT_North Branch_Site Assessment.csv'
 
 # df = pd.read_excel(SAdf, engine="openpyxl")
-df = pd.read_excel(SAdf, header=1, usecols=['APN','ST No.', 'Unit No.', 'ST Address', 'COUNTY','Date Completed',
+df = pd.read_csv(SAdf, header=1, usecols=['APN','ST No.', 'Unit No.', 'ST Address', 'COUNTY','Date Completed',
                                             'Automobiles','Chimney','Notes'],index_col='APN')
 # df = pd.read_excel(SAdf, header=1, index_col="APN")
 # pd.options.display.width = None
@@ -13,7 +13,7 @@ df = pd.read_excel(SAdf, header=1, usecols=['APN','ST No.', 'Unit No.', 'ST Addr
 # pd.set_option('display.max_rows', 2200)
 # pd.set_option('display.max_columns', 2200)
 
-
+df.to_excel("Test the csv file.xlsx")
 
 
 
