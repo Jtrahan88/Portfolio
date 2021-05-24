@@ -27,11 +27,11 @@ import numpy as np
 
 #TODO: SS Excel Name: make this so I do not have to manually enter it. This Sheet is constanly changing. Maybe webscraping?
 # Smart Sheets Workbook variable
-fileNameSS = "Northern Branch Phase II Debris Removal Ops 05-18-2021.csv"
+fileNameSS = "Northern Branch Phase II Debris Removal Ops.xlsx"
 
 
 print("Opening Vehicle check program.....")
-dfSS = pd.read_csv(fileNameSS,usecols= ['APN','Street #', 'Street Name','Debris Finish', 'Number of Vehicles',
+dfSS = pd.read_excel(fileNameSS,usecols= ['APN','Street #', 'Street Name','Debris Finish', 'Number of Vehicles',
                                           'Number of Vehicles Removed',  'County'], index_col='APN')
 pd.options.display.width= None #only way to display all columns and rows for my data set 2500cols x 119rows
 pd.set_option('display.max_rows', 3000)
@@ -41,7 +41,7 @@ pd.options.display.max_columns= None
 #  # df.reset_index(inplace=True) #This will reset the index back to numbers
 
 
-# dfSS.to_excel("Test the csv file.xlsx")
+dfSS.to_excel("SS Cols for Vecs.xlsx")
 
 # TODO: Function for total vehicle counts after checks. Graph for display*. ******************We need to do comparisions with/before this part******************.
 def getTotalCounts(dfSS): # this function is for getting counts by any way you need.
@@ -66,7 +66,7 @@ def getTotalCounts(dfSS): # this function is for getting counts by any way you n
     plt.show()  # show or print out the graph to view
 
 
-getTotalCounts(dfSS) # test function
+# getTotalCounts(dfSS) # test function
 
 
 
