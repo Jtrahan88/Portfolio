@@ -19,7 +19,7 @@
 
 import pandas as pd
 # import openpyxl
-# import matplotlib.pyplot as plt
+import matplotlib.pyplot as plt
 import numpy as np
 # from tkinter import Tk
 # from tkinter.filedialog import askopenfile
@@ -41,9 +41,21 @@ pd.options.display.max_columns= None
 #  # df.reset_index(inplace=True) #This will reset the index back to numbers
 
 
-dfSS.to_excel("SS Cols for Vecs.xlsx")
+# dfSS.to_excel("SS Cols for Vecs.xlsx")
 
-# TODO: Function for total vehicle counts after checks. Graph for display*. ******************We need to do comparisions with/before this part******************.
+
+
+
+
+
+
+
+
+
+
+
+
+#TODO: get graph to only count numbers, and number >0 ONLY!
 def getTotalCounts(dfSS): # this function is for getting counts by any way you need.
     county = dfSS.groupby(['County']).count()  # this will put "COUNTY"on Y-Axis and counts all the values from other columns
     counts = county.loc[:,"Number of Vehicles Removed"]  # left side :  all rows , right side: is the column we want to look at. This is how we chose what we want to ount up
@@ -66,7 +78,7 @@ def getTotalCounts(dfSS): # this function is for getting counts by any way you n
     plt.show()  # show or print out the graph to view
 
 
-# getTotalCounts(dfSS) # test function
+getTotalCounts(dfSS) # test function
 
 
 
