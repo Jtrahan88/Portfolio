@@ -41,14 +41,21 @@ pd.set_option('display.max_columns', 3000)
 pd.options.display.max_columns = None
 #TODO: how to make open and close file more automated*
 
-# dfRTR.to_excel("RTR Vec Cols.xlsx")
-
-# TODO:
-#  filter the data for service codes "4" (Go Ahead) and "C04" (Go Back) and for voild ==False only
-  # .isin was the key for this. MAKE A YOUTUBE ON THIS 5+hrs to figure this out.
+dfRTR.to_excel("RTR Vec Cols.xlsx")
 
 
-def getRTRVecCols(dfRTR): #TODO: works in CVS but formual do not match one made nack into a excel. 1 != 1 for odd reasons unknown at this time
+
+
+
+
+
+
+
+
+
+#TODO: works in CVS but formulas do not match once made back into a excel. 1 != 1 for odd reasons unknown at this time.
+# Exmaple =A1=B1 if both cells show 1 and 1 that formula will say false. 
+def getRTRVecCols(dfRTR):
     dfRTR['Service Code'] = dfRTR['Service Code'].str.replace(r'\W', "") #TODO: Learn more about Regex!!!
     filt = dfRTR[(dfRTR['Is Void'] != True) & dfRTR["Service Code"].isin(["CO4", "4"])]
     filt.to_excel('RTR Vec Cols.xlsx')
