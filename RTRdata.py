@@ -29,10 +29,10 @@ from tkinter.filedialog import askopenfile
 
 
 # RTR Workbook variable
-fileNameRTR = "cCalRecycle_NorthBranch_DataManagerTicketExport.csv"
+fileNameRTR = "cCalRecycle_NorthBranch_DataManagerTicketExport.xlsx"
 
 print("Opening Vehicle check program.....")
-dfRTR = pd.read_csv(fileNameRTR,usecols=["Zone Name", "End Time", "Is Void", "Ticket Notes",
+dfRTR = pd.read_excel(fileNameRTR,usecols=["Zone Name", "End Time", "Is Void", "Ticket Notes",
                                            "Service Code", "Unit Count", "Disposal Monitor Name", "Addr No",
                "Addr St", "Ticket Number"], index_col="Zone Name")
 pd.options.display.width= None #only way to display all columns and rows for my data set 2500cols x 119rows
@@ -41,19 +41,19 @@ pd.set_option('display.max_columns', 3000)
 pd.options.display.max_columns = None
 #TODO: how to make open and close file more automated*
 
+# dfRTR.to_excel("RTR Vec Cols.xlsx")
 
 # TODO:
 #  filter the data for service codes "4" (Go Ahead) and "C04" (Go Back) and for voild ==False only
   # .isin was the key for this. MAKE A YOUTUBE ON THIS 5+hrs to figure this out.
 
-# dfRTR.to_csv('Test.csv')
-# dfRTR.replace("CO4 ","CO4")
-# dfRTR.replace("4 ", "4")
 
-def getRTRVecCols(dfRTR):
+def getRTRVecCols(dfRTR): #TODO: works in CVS but formual do not match one made nack into a excel. 1 != 1 for odd reasons unknown at this time
     dfRTR['Service Code'] = dfRTR['Service Code'].str.replace(r'\W', "") #TODO: Learn more about Regex!!!
     filt = dfRTR[(dfRTR['Is Void'] != True) & dfRTR["Service Code"].isin(["CO4", "4"])]
-    filt.to_excel('VecTest.xlsx')
+    filt.to_excel('RTR Vec Cols.xlsx')
+
+# getRTRVecCols(dfRTR)
 
 #  Figure out the weird APNs(In Zone Name), by hard coding, what they need to look like.
 #           Examples: 0203200600 should = 020-320-06-00 | 0203300500_#105 should = 020-330-05-00_#105
