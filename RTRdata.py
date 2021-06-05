@@ -41,32 +41,22 @@ pd.set_option('display.max_columns', 3000)
 pd.options.display.max_columns = None
 #TODO: how to make open and close file more automated*
 
-# dfRTR.to_excel("RTR Vehicle set up.xlsx")
-
-
-
-
-
-
-
-
-
-
-
-#TODO: works in CVS but formulas do not match once made back into a excel. 1 != 1 for odd reasons unknown at this time.
-# Exmaple =A1=B1 if both cells show 1 and 1 that formula will say false.
+# Re-arrange Column order
+dfRTR = dfRTR[["End Time", "Is Void", "Ticket Notes", "Service Code", "Unit Count", "Disposal Monitor Name", "Addr No",
+               "Addr St", "Ticket Number"]]
+#TODO: rearrange columns
 def getRTRVecCols(dfRTR):
-    # this is majority of special chars that may be in columns cells
+    # this is majority of special chars that may be in columns cells. May need to add more
     spec_chars = ["!", '"', "#", "%", "&", "'", "(", ")",
                   "*", "+", ",", "-", ".", "/", ":", ";", "<",
                   "=", ">", "?", "@", "[", "\\", "]", "^", "_",
                   "`", "{", "|", "}", "~", "–"]
 
-    # this forloop will remove all those special chars for a specific column
+    # this for loop will remove all those special chars for a specific column
     for char in spec_chars:
-        dfRTR["Service Code"] = dfRTR["Service Code"].str.replace(char, ' ')
+        dfRTR["Service Code"] = dfRTR["Service Code"].str.replace(char, ' ', regex = True)
 
-    # with the above we may get whilte spaces. this ishow to remove those
+    # with the above we may get white spaces. this is how to remove those
     dfRTR["Service Code"] = dfRTR["Service Code"].str.split().str.join(" ")
 
     # take in multiple values for in one column to filter for
