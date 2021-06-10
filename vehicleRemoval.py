@@ -17,6 +17,7 @@
 # 'APN'(made index not needed), 'Street #', 'Street Name', 'Number of Vehicles', 'Number of Vehicles Removed', 'Debris Finish', 'County'
 
 import pandas as pd
+import time
 # import openpyxl
 import matplotlib.pyplot as plt
 import numpy as np
@@ -47,8 +48,9 @@ def vecCheck(dfSS):
     dfSS = dfSS[['APN','Street #', 'Street Name','Debris Finish', 'Number of Vehicles',
                  'Number of Vehicles Removed',  'County']]
     dfSS = dfSS.set_index("APN")
-    dfSS.to_excel("SmartSheet Vehicle Set up.xlsx")
-# vecCheck(dfSS)
+    todaysDate = time.strftime("%m-%d-%y")
+    dfSS.to_excel("SmartSheet Vehicle Set up " + todaysDate + ".xlsx")
+vecCheck(dfSS)
 
 
 #TODO: SScardCheck  --------------> Checks card locations in SMart Sheets
@@ -56,7 +58,7 @@ def SScardCheck(dfSS):
     dfSS = dfSS[['APN', "Debris Crew", "Division", "County", "Debris Crew Leader/Crew#"]]
     dfSS = dfSS.set_index("APN")
     dfSS.to_excel("Card Check.xlsx")
-SScardCheck(dfSS)
+# SScardCheck(dfSS)
 
 #  # df.reset_index(inplace=True) #This will reset the index back to numbers
 
@@ -298,11 +300,18 @@ uniqueAPNs = ["018-510-02-00_#19A", "018-530-04-00", "018-530-06-00_#17", "018-5
 # 009-380-070-000_h
 # 009-380-070-000_e
 # 009-380-070-000_j
-#
+# 071-370-014-000_128
+# 071-370-014-000_130
+# 071-060-009-000_123
+# 071-060-009-000_125
+# 071-060-009-000_35
+# 062-320-033-000_20
+# 062-320-033-000_44
+# 062-740-020-000_123
 # ]
-
+# TODO: APNsetup ------> filter amodified APNs while skiping the ones in the unique APN list. (Does not work)
 def APNsetup(dfSS):
-    if dfSS["APN" ] != dfSS["APN"] in uniqueAPNs:
+    if ~dfSS["APN"].isin(uniqueAPNs).any():
         dfSS["APN"] = dfSS["APN"].str.replace("-", "").str[:9] #TODO: Works but we need to skip over the Special APNs. Mayb use thing in a DICT?dfSS
     dfSS.to_excel("Test APN func.xlsx")
 # APNsetup(dfSS)
@@ -322,7 +331,7 @@ def APNsetup(dfSS):
 
 
 
-#TODO: Graph out sheet->get graph to only count numbers, and number >0 ONLY! (WIP)
+#TODO: Graph out sheet->get graph to only count numbers, and number >0 ONLY!
 def getTotalCounts(dfSS): # this function is for getting counts by any way you need.
     county = dfSS.groupby(['County']).count()  # this will put "COUNTY"on Y-Axis and counts all the values from other columns
     counts = county.loc[:,"Number of Vehicles Removed"]  # left side :  all rows , right side: is the column we want to look at. This is how we chose what we want to ount up
