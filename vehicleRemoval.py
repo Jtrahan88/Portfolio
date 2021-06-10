@@ -50,14 +50,15 @@ def vecCheck(dfSS):
     dfSS = dfSS.set_index("APN")
     todaysDate = time.strftime("%m-%d-%y")
     dfSS.to_excel("SmartSheet Vehicle Set up " + todaysDate + ".xlsx")
-vecCheck(dfSS)
+# vecCheck(dfSS)
 
 
 #TODO: SScardCheck  --------------> Checks card locations in SMart Sheets
 def SScardCheck(dfSS):
     dfSS = dfSS[['APN', "Debris Crew", "Division", "County", "Debris Crew Leader/Crew#"]]
     dfSS = dfSS.set_index("APN")
-    dfSS.to_excel("Card Check.xlsx")
+    todaysDate = time.strftime("%m-%d-%y")
+    dfSS.to_excel("Card Check " + todaysDate + ".xlsx")
 # SScardCheck(dfSS)
 
 #  # df.reset_index(inplace=True) #This will reset the index back to numbers
@@ -307,14 +308,22 @@ uniqueAPNs = ["018-510-02-00_#19A", "018-530-04-00", "018-530-06-00_#17", "018-5
 # 071-060-009-000_35
 # 062-320-033-000_20
 # 062-320-033-000_44
-# 062-740-020-000_123
+# 062-740-020-000_123"
 # ]
 # TODO: APNsetup ------> filter amodified APNs while skiping the ones in the unique APN list. (Does not work)
-def APNsetup(dfSS):
-    if ~dfSS["APN"].isin(uniqueAPNs).any():
-        dfSS["APN"] = dfSS["APN"].str.replace("-", "").str[:9] #TODO: Works but we need to skip over the Special APNs. Mayb use thing in a DICT?dfSS
-    dfSS.to_excel("Test APN func.xlsx")
-# APNsetup(dfSS)
+def APNsetup(df):
+    df = df[['APN', 'Street #', 'Street Name', 'Debris Finish', 'Number of Vehicles',
+             'Number of Vehicles Removed', 'County']]
+    df.set_index("APN") #doesnt work on making APN index for unknown reasons
+
+    df["Test"] = df["APN"].str.replace("-", "").str[:9]
+    df.loc[~df["APN"].isin(uniqueAPNs), "APN"] = df.loc[~df["APN"].isin(uniqueAPNs), "Test"]
+
+    todaysDate = time.strftime("%m-%d-%y")
+    df.to_excel("APN TEXT " + todaysDate + ".xlsx")
+
+
+APNsetup(dfSS)
 # make a dict for trinity and other counties that have special APNs so skip next step and leave as is.
 
 # remove extra zeros from APNS
