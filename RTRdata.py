@@ -17,6 +17,7 @@
 # "Zone Name", "End Time", "Is Void", "Ticket Notes", "Service Code", "Unit Count", "Disposal Monitor Name", "Addr No", "Addr St", "Ticket Number"
 
 import pandas as pd
+import time
 import openpyxl
 import matplotlib.pyplot as plt
 import numpy as np
@@ -80,7 +81,7 @@ dfRTR = pd.read_excel(fileNameRTR) #,usecols=["Zone Name", "End Time", "Is Void"
 
 
 
-#TODO: getRTRVecCols()    ->>>>> Vehicle Column Checks Setup- *Done*
+#TODO: getRTRVecCols() -----------------------> Vehicle Column Checks Setup- *Done*
 def getRTRVecCols(dfRTR):
     # Pick columns needed
     dfRTR = dfRTR[["Zone Name", "End Time", "Is Void", "Ticket Notes","Service Code", "Unit Count", "Disposal Monitor Name",
@@ -110,6 +111,7 @@ def getRTRVecCols(dfRTR):
 
     # filtering our data set with multiple conditon. 2 conditions is in the same cell
     dfRTR = dfRTR[(dfRTR["Is Void"] != True) & (dfRTR["Service Code"].isin(codes))]
-    dfRTR.to_excel('RTR Vec Cols.xlsx')
+    todaysDate = time.strftime("%m-%d-%y")
+    dfRTR.to_excel('RTR Vec Cols ' + todaysDate + '.xlsx')
 
 getRTRVecCols(dfRTR)
