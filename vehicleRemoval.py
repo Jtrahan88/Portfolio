@@ -50,7 +50,7 @@ def vecCheck(dfSS):
     dfSS = dfSS.set_index("APN")
     todaysDate = time.strftime("%m-%d-%y")
     dfSS.to_excel("SmartSheet Vehicle Set up " + todaysDate + ".xlsx")
-# vecCheck(dfSS)
+vecCheck(dfSS)
 
 
 #TODO: SScardCheck  --------------> Checks card locations in SMart Sheets
@@ -59,18 +59,18 @@ def SScardCheck(dfSS):
     dfSS = dfSS.set_index("APN")
     todaysDate = time.strftime("%m-%d-%y")
     dfSS.to_excel("Card Check " + todaysDate + ".xlsx")
-SScardCheck(dfSS)
+# SScardCheck(dfSS)
 
 #  # df.reset_index(inplace=True) #This will reset the index back to numbers
 
 
 # dfSS.to_excel("SmartSheet Vehicle Set up.xlsx")
 
-#TODO: Filter APNs for no dahses But ignore the ODD APNS
+
 
 # removes all dashes then joins that together with no spaces for full APN & remove extras zeros from APNS
 
-# TODO: APNsetup ------> filter modified APNs while skipping the ones in the unique APN list. (Does not work...yet)
+# TODO: APNsetup(df) ------>  (Does not work...yet)
 uniqueAPNs = ["018-510-02-00_#19A", "018-530-04-00", "018-530-06-00_#17", "018-530-09-00", "018-530-10-00", "020-080-28-00_#24B"
               "020-080-31-00", "020-320-06-00", "020-330-05-00_#105", "020-330-05-00_#106", "020-330-05-00_#107", "020-330-05-00_#110",
               "020-340-14-00", "020-340-22-00", "020-340-36-00", "020-470-01-00", "021-160-13-00", "021-160-23-00",
@@ -117,14 +117,14 @@ uniqueAPNs = ["018-510-02-00_#19A", "018-530-04-00", "018-530-06-00_#17", "018-5
               "041-330-049-000_12573", "041-330-055-000_barn", "009-380-070-000_b", "009-380-070-000_c", "009-380-070-000_d",
               "009-380-070-000_a", "009-380-070-000_f", "009-380-070-000_g", "009-380-070-000_h", "009-380-070-000_e","009-380-070-000_j",
               "071-370-014-000_128", "071-370-014-000_130", "071-060-009-000_123", "071-060-009-000_125", "071-060-009-000_35",
-              "062-320-033-000_20", "062-320-033-000_44", "062-740-020-000_123",]
-]
+              "062-320-033-000_20", "062-320-033-000_44", "062-740-020-000_123"]
+
 def APNsetup(df):
     df = df[['APN', 'Street #', 'Street Name', 'Debris Finish', 'Number of Vehicles',
              'Number of Vehicles Removed', 'County']]
     df.set_index("APN") #doesnt work on making APN index for unknown reasons
 
-    df["Test"] = df["APN"].str.replace("-", "").str[:9]
+    df["Place Holder"] = df["APN"].str.replace("-", "").str[:9]
     df.loc[~df["APN"].isin(uniqueAPNs), "APN"] = df.loc[~df["APN"].isin(uniqueAPNs), "Test"]
 
     todaysDate = time.strftime("%m-%d-%y")
@@ -137,6 +137,16 @@ def APNsetup(df):
 # remove extra zeros from APNS
 
 
+#TODO: sumVehicles(df) -------------> This wil give us the toatl for number of vehicles and nuber of vehicles removed in an excel sheet
+def sumVehicles(df):
+    #convert obeject in this column to floats
+    df["Number of Vehicles Removed"] = pd.to_numeric(df["Number of Vehicles Removed"], errors='coerce')
+    # fill all NAN columns with 0's
+    df[['Number of Vehicles', 'Number of Vehicles Removed']] = df[['Number of Vehicles', 'Number of Vehicles Removed']].fillna(0)
+    # sums up all our counts for the columns named
+    df = df.groupby('County')[['Number of Vehicles', 'Number of Vehicles Removed']].sum()
+    df.to_excel("Removed NAN test.xlsx")
+sumVehicles(df)
 
 
 
@@ -146,9 +156,7 @@ def APNsetup(df):
 
 
 
-
-
-#TODO: Graph out sheet->get graph to only count numbers, and number >0 ONLY!
+#TODO: getTotalCounts(dfSS) ------>Graph out sheet->get graph to only count numbers, and number >0 ONLY!
 def getTotalCounts(dfSS): # this function is for getting counts by any way you need.
     county = dfSS.groupby(['County']).count()  # this will put "COUNTY"on Y-Axis and counts all the values from other columns
     counts = county.loc[:,"Number of Vehicles Removed"]  # left side :  all rows , right side: is the column we want to look at. This is how we chose what we want to ount up
