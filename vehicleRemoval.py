@@ -31,7 +31,7 @@ fileNameSS = "Northern Branch Phase II Debris Removal Ops.xlsx"
 
 
 print("Opening Vehicle check program.....")
-dfSS = pd.read_excel(fileNameSS)#,usecols= ['APN','Street #', 'Street Name','Debris Finish', 'Number of Vehicles',
+df = pd.read_excel(fileNameSS)#,usecols= ['APN','Street #', 'Street Name','Debris Finish', 'Number of Vehicles',
                                           #'Number of Vehicles Removed',  'County']) # index_col='APN' do this later after futher editing APNS
 #only way to display all columns and rows for my data set
 # pd.set_option('display.max_rows', 3000)
@@ -44,27 +44,27 @@ dfSS = pd.read_excel(fileNameSS)#,usecols= ['APN','Street #', 'Street Name','Deb
 
 #TODO: vecCheck  ----------------->Columns for vehicle checks
 
-def vecCheck(dfSS):
-    dfSS = dfSS[['APN','Street #', 'Street Name','Debris Finish', 'Number of Vehicles',
+def vecCheck(df):
+    df = df[['APN', 'Street #', 'Street Name', 'Debris Finish', 'Number of Vehicles',
                  'Number of Vehicles Removed',  'County']]
-    dfSS = dfSS.set_index("APN")
+    df = df.set_index("APN")
     todaysDate = time.strftime("%m-%d-%y")
-    dfSS.to_excel("SmartSheet Vehicle Set up " + todaysDate + ".xlsx")
-vecCheck(dfSS)
+    df.to_excel("SmartSheet Vehicle Set up " + todaysDate + ".xlsx")
+# vecCheck(df)
 
 
 #TODO: SScardCheck  --------------> Checks card locations in SMart Sheets
-def SScardCheck(dfSS):
-    dfSS = dfSS[['APN', "Debris Crew", "Division", "County", "Debris Crew Leader/Crew#"]]
-    dfSS = dfSS.set_index("APN")
+def SScardCheck(df):
+    df = df[['APN', "Debris Crew", "Division", "County", "Debris Crew Leader/Crew#"]]
+    df = df.set_index("APN")
     todaysDate = time.strftime("%m-%d-%y")
-    dfSS.to_excel("Card Check " + todaysDate + ".xlsx")
-# SScardCheck(dfSS)
+    df.to_excel("Card Check " + todaysDate + ".xlsx")
+# SScardCheck(df)
 
 #  # df.reset_index(inplace=True) #This will reset the index back to numbers
 
 
-# dfSS.to_excel("SmartSheet Vehicle Set up.xlsx")
+# df.to_excel("SmartSheet Vehicle Set up.xlsx")
 
 
 
@@ -131,20 +131,31 @@ def APNsetup(df):
     df.to_excel("APN TEXT " + todaysDate + ".xlsx")
 
 
-# APNsetup(dfSS)
+# APNsetup(df)
 # make a dict for trinity and other counties that have special APNs so skip next step and leave as is.
 
 # remove extra zeros from APNS
 
 
-#TODO: sumVehicles(df) -------------> This wil give us the toatl for number of vehicles and nuber of vehicles removed in an excel sheet
+#TODO: sumVehicles(df) -------------> This will give us the total for number of vehicles and number of vehicles removed in an excel sheet
 def sumVehicles(df):
-    #convert obeject in this column to floats
+    # convert object in this column to floats
     df["Number of Vehicles Removed"] = pd.to_numeric(df["Number of Vehicles Removed"], errors='coerce')
     # fill all NAN columns with 0's
     df[['Number of Vehicles', 'Number of Vehicles Removed']] = df[['Number of Vehicles', 'Number of Vehicles Removed']].fillna(0)
-    # sums up all our counts for the columns named
-    df = df.groupby('County')[['Number of Vehicles', 'Number of Vehicles Removed']].sum()
+    # Make a totals column for vehicles left
+    df["Vehicles Left"] = df['Number of Vehicles'] - df['Number of Vehicles Removed']
+    county = df.groupby(['County']).sum()  #gets us county sums for all columns TODO: test this***
+    #by using df.loc() we get all row on the left side by (:,[[col1,col2,etc]]) and cols on the right side
+    SumAnyThing = county.loc[:, ['Number of Vehicles', 'Number of Vehicles Removed', 'Vehicles Left']]
+    
+    
+    # TODO: old way. no good for GUI fun
+    # df["Vehicles Left"] = df['Number of Vehicles'] - df['Number of Vehicles Removed']
+    # # sums up all our counts for the columns named in code
+    # df = df.groupby('County')[['Number of Vehicles', 'Number of Vehicles Removed', "Vehicles Left"]].sum()
+#     print(SumAnyThing)
+    # Put a total colums under counties
     df.to_excel("Removed NAN test.xlsx")
 sumVehicles(df)
 
@@ -156,9 +167,9 @@ sumVehicles(df)
 
 
 
-#TODO: getTotalCounts(dfSS) ------>Graph out sheet->get graph to only count numbers, and number >0 ONLY!
-def getTotalCounts(dfSS): # this function is for getting counts by any way you need.
-    county = dfSS.groupby(['County']).count()  # this will put "COUNTY"on Y-Axis and counts all the values from other columns
+#TODO: getTotalCounts(df) ------>Graph out sheet->get graph to only count numbers, and number >0 ONLY!
+def getTotalCounts(df): # this function is for getting counts by any way you need.
+    county = df.groupby(['County']).count()  # this will put "COUNTY"on Y-Axis and counts all the values from other columns
     counts = county.loc[:,"Number of Vehicles Removed"]  # left side :  all rows , right side: is the column we want to look at. This is how we chose what we want to ount up
     # counts.to_excel("test3.xlsx") # if we use county we get counts for entier data set columns by county, if we use counts.to_excel() we only get vec removed column.
 
@@ -177,11 +188,11 @@ def getTotalCounts(dfSS): # this function is for getting counts by any way you n
     plt.legend()  # add a legend for our graph
     # plt.xticks([1,2,3]) # change to x tick values and how much they go or down by
     # plt.yticks([1,2,3]) # change to y tick values and how much they go or down by
-    print(dfSS[["County", "Number of Vehicles Removed"]].groupby("County").count())
+    print(df[["County", "Number of Vehicles Removed"]].groupby("County").count())
     plt.show()  # show or print out the graph to view
 
 
-# getTotalCounts(dfSS) # test function
+# getTotalCounts(df) # test function
 
 
 
