@@ -4,7 +4,7 @@ import time
 todaysDate = time.strftime("%m-%d-%y") # to add dates to our file
 
 #File name variable
-smartsheets_file = 'Northern Branch Phase II Debris Removal Ops (1).xlsx'
+smartsheets_file = 'state & Field Tracker/Northern Branch Phase II Debris Removal Ops (1).xlsx'
 tree_file = 'state & Field Tracker/North Branch CA Wildfires - Parcel Issues.xlsx' # need to open specific sheet will not work as of now
 sa_file = "state & Field Tracker/TT_North Branch_Site Assessment.xlsx"
 asb_file = 'state & Field Tracker/TT_North Branch_Asbestos.xlsx'
@@ -12,10 +12,10 @@ soil_file = 'state & Field Tracker/TT_Northern Branch_Soil.xlsx'
 
 # opens our files
 df_ss = pd.read_excel(smartsheets_file) #Smart Sheets
-# df_tree = pd.read_excel(tree_file, header=1) # Tree Data
-# df_sa = pd.read_excel(sa_file, header=1) # SA data
-# df_asb = pd.read_excel(asb_file, header=1) # asb data
-# df_soil = pd.read_excel(soil_file, header=1) # Soil Data
+df_tree = pd.read_excel(tree_file, sheet_name="TREE SURVEYS") # Tree Data
+df_sa = pd.read_excel(sa_file, header=1) # SA data
+df_asb = pd.read_excel(asb_file, header=1) # asb data
+df_soil = pd.read_excel(soil_file, header=1) # Soil Data
 
 
 # TODO: smart_sheets_cols(df) --> get colums ready fro VBA
@@ -39,15 +39,15 @@ def tree_cols(df):
     df = df[["APN", "Tree Survey Date", "Number of Trees"]]
     df = df.set_index("APN")
     df.to_excel("Tree data Columns" + todaysDate + ".xlsx")
-# tree_cols(df_tree)
+tree_cols(df_tree)
 
 # TODO: sa_cols(df) ---> get columns ready for VBA
 #  Sa has the columns on line two. Go back fins out how to remedy this again
 def sa_cols(df):
     df = df[["APN", "Date Completed", "Automobiles"]]
-    df.set_index("APN")
-    df.to_excel("SA data Columns" + todaysDate + ".xlsx")
-# sa_cols(df_sa)
+    df = df.set_index("APN")
+    df.to_excel("SA data Columns " + todaysDate + ".xlsx")
+sa_cols(df_sa)
 
 # TODO: asb_cols(df) ---> get columns ready for VBA
 #  Sa has the columns on line two. Go back fins out how to remedy this again
@@ -56,8 +56,8 @@ def asb_cols(df):
              "Chimney", "NESHAP Walls", "CHIM TIP (DATE)", "Chimney Finding",  "Asbestos Abatement Completed Date",
             "Chimney Abatement Completed Date", "No. of Samples"]]
     df = df.set_index("APN")
-    df.to_excel("ASB data columns" + todaysDate + ".xlsx")
-# asb_cols(df_asb)
+    df.to_excel("ASB data columns " + todaysDate + ".xlsx")
+asb_cols(df_asb)
 
 # TODO: soil_cols(df) ---> get columns ready for VBA
 #  Sa has the columns on line two. Go back fins out how to remedy this again
@@ -65,4 +65,4 @@ def soil_cols(df):
     df = df[["APN", "Date Collected"]]
     df = df.set_index("APN")
     df.to_excel("Soil data columns" + todaysDate + ".xlsx")
-# soil_cols(df_soil)
+soil_cols(df_soil)
