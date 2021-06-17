@@ -135,7 +135,7 @@ def APNsetup(df):
              'Number of Vehicles Removed', 'County']]
 
 
-    df["Place Holder"] = df.loc[:,"APN"].str.replace("-", "").str[:9]
+    df.loc[:,"Place Holder"] = df.loc[:,"APN"].str.replace("-", "").str[:9]
     df.loc[~df["APN"].isin(uniqueAPNs), "APN"] = df.loc[~df["APN"].isin(uniqueAPNs), "Place Holder"]
     df = df.set_index("APN")
     todaysDate = time.strftime("%m-%d-%y")
