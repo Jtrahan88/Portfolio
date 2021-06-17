@@ -1,3 +1,6 @@
+#TODO: get shets to populate into the same excel file. Preexsisting file would be best!
+
+
 import pandas as pd
 import time
 
