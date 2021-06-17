@@ -12,10 +12,10 @@ soil_file = 'state & Field Tracker/TT_Northern Branch_Soil.xlsx'
 
 # opens our files
 df_ss = pd.read_excel(smartsheets_file) #Smart Sheets
-df_tree = pd.read_excel(tree_file) # Tree Data
-df_sa = pd.read_excel(sa_file) # SA data
-df_asb = pd.read_excel(asb_file) # asb data
-df_soil = pd.read_excel(soil_file)
+df_tree = pd.read_excel(tree_file, header=1) # Tree Data
+df_sa = pd.read_excel(sa_file, header=1) # SA data
+df_asb = pd.read_excel(asb_file, header=1) # asb data
+df_soil = pd.read_excel(soil_file, header=1)
 
 
 # TODO: smart_sheets_cols(df) --> get colums ready fro VBA
