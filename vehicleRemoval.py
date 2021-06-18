@@ -74,8 +74,7 @@ def sumVehicles(df):
     df = df.copy()
     # We have text in a number column(FILLNA), and we will need to covert from object to a numeric value for Number of Vehicles Removed & Number of Vehicles
     df.loc[:, ['Number of Vehicles', 'Number of Vehicles Removed']] = df.loc[:, ['Number of Vehicles',
-                                                                                 'Number of Vehicles Removed']].fillna(
-        0)
+                                                                                 'Number of Vehicles Removed']].fillna(0)
     df.loc[:, "Number of Vehicles"] = pd.to_numeric(df.loc[:, "Number of Vehicles"], errors='coerce')
     df.loc[:, "Number of Vehicles Removed"] = pd.to_numeric(df.loc[:, "Number of Vehicles Removed"], errors='coerce')
 
@@ -90,8 +89,8 @@ def sumVehicles(df):
     # Get out math stuff done nuber of vehicles minus vechilces removed. See how many is left
     df.loc[:, "Vehicles Left"] = df.loc[:, "Number of Vehicles"] - df.loc[:, "Number of Vehicles Removed"]
     print(df.groupby("County")[["Number of Vehicles", "Number of Vehicles Removed", "Vehicles Left"]].sum())
-    df.to_excel("Vehicles left test.xlsx")
-    # sums up all our counts for the columns named
+    # df.to_excel("Vehicles left test.xlsx")
+    # sums up all our counts for the columns named. We can send this to an excel if needed
     return df.groupby("County")[["Number of Vehicles", "Number of Vehicles Removed", "Vehicles Left"]].sum()
 
 sumVehicles(df)
