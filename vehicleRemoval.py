@@ -54,7 +54,7 @@ def vecCheck(df):
     df.to_excel("SmartSheet Vehicle Set up " + todaysDate + ".xlsx")
 
 
-vecCheck(df)
+# vecCheck(df)
 
 
 # TODO: SScardCheck  --------------> Checks card locations in SMart Sheets
@@ -66,6 +66,35 @@ def SScardCheck(df):
 
 
 # SScardCheck(df)
+
+# TODO: sumVehicles(df) -------------> This will give us the total for number of vehicles and number of vehicles removed in an excel sheet
+def sumVehicles(df):
+    # make a copy of our data frame so we do not mess with the orginal
+    # also to prevent chained indexing.
+    df = df.copy()
+    # We have text in a number column(FILLNA), and we will need to covert from object to a numeric value for Number of Vehicles Removed & Number of Vehicles
+    df.loc[:, ['Number of Vehicles', 'Number of Vehicles Removed']] = df.loc[:, ['Number of Vehicles',
+                                                                                 'Number of Vehicles Removed']].fillna(
+        0)
+    df.loc[:, "Number of Vehicles"] = pd.to_numeric(df.loc[:, "Number of Vehicles"], errors='coerce')
+    df.loc[:, "Number of Vehicles Removed"] = pd.to_numeric(df.loc[:, "Number of Vehicles Removed"], errors='coerce')
+
+    # vairable for isin()
+    Status = ("Withdrawal", "Ineligible")
+
+    # filter for butte county only, number of vhelice remove 0 only, take out "status" aka withdrawals anf ineligible
+    df = df[(df.loc[:, 'Number of Vehicles Removed'] == 0) & (df.loc[:, "County"] == "Butte") & (~df.loc[:, 'Structural Status'].isin(Status))]
+    df.loc[:, "Number of Vehicles"] = pd.to_numeric(df.loc[:, "Number of Vehicles"], errors='coerce')
+    df.loc[:, "Number of Vehicles Removed"] = pd.to_numeric(df.loc[:, "Number of Vehicles Removed"], errors='coerce')
+
+    # Get out math stuff done nuber of vehicles minus vechilces removed. See how many is left
+    df.loc[:, "Vehicles Left"] = df.loc[:, "Number of Vehicles"] - df.loc[:, "Number of Vehicles Removed"]
+    print(df.groupby("County")[["Number of Vehicles", "Number of Vehicles Removed", "Vehicles Left"]].sum())
+    df.to_excel("Vehicles left test.xlsx")
+    # sums up all our counts for the columns named
+    return df.groupby("County")[["Number of Vehicles", "Number of Vehicles Removed", "Vehicles Left"]].sum()
+
+sumVehicles(df)
 
 #  # df.reset_index(inplace=True) #This will reset the index back to numbers
 
@@ -142,35 +171,13 @@ def APNsetup(df):
     df.to_excel("APN TEXT " + todaysDate + ".xlsx")
 
 
-APNsetup(df)
+# APNsetup(df)
 # make a dict for trinity and other counties that have special APNs so skip next step and leave as is.
 
 # remove extra zeros from APNS
 
 
-# TODO: sumVehicles(df) -------------> This will give us the total for number of vehicles and number of vehicles removed in an excel sheet
-def sumVehicles(df):
-    # convert object in this column to floats
-    df["Number of Vehicles Removed"] = pd.to_numeric(df["Number of Vehicles Removed"], errors='coerce')
-    # fill all NAN columns with 0's.  Very important. sill not sum right if not in code.
-    df[['Number of Vehicles', 'Number of Vehicles Removed']] = df[
-        ['Number of Vehicles', 'Number of Vehicles Removed']].fillna(0)
-    # Make a totals column for vehicles left
-    df["Vehicles Left"] = df['Number of Vehicles'] - df['Number of Vehicles Removed']
-    county = df.groupby(['County']).sum()  # gets us county sums for all columns TODO: test this***
-    # by using df.loc() we get all row on the left side by (:,[[col1,col2,etc]]) and cols on the right side
-    SumAnyThing = county.loc[:, ['Number of Vehicles', 'Number of Vehicles Removed', 'Vehicles Left']]
 
-    # TODO: old way. no good for GUI fun
-    # df["Vehicles Left"] = df['Number of Vehicles'] - df['Number of Vehicles Removed']
-    # # sums up all our counts for the columns named in code
-    # df = df.groupby('County')[['Number of Vehicles', 'Number of Vehicles Removed', "Vehicles Left"]].sum()
-    #     print(SumAnyThing)
-    # Put a total colums under counties
-    df.to_excel("Removed NAN test.xlsx")
-
-
-# sumVehicles(df)
 
 
 # TODO: getTotalCounts(df) ------>Graph out sheet->get graph to only count numbers, and number >0 ONLY!
