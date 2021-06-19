@@ -4,6 +4,12 @@
 #  GET TOTAL VEHICLE COUNTS AND VEHICLES REMOVED COUNTS FOR EACH COUNTY
 #  WE NEED TO ALSO SHOW STREET #, ADDRESS, DEBRIS REMOVAL DATE
 #  Show any mismatch(highlight them, make them pop out in a table with reason, etc)
+# TODO: make this so I do not have to manually enter it. This Sheet is constantly changing. Maybe web scraping?
+
+#TODO: make GUI once everything else is complete.
+#     labelThisVarDifferent = askopenfile(title='Select File')  # shows dialog box and return the path
+#     # Tk.withdraw()
+
 
 
 # TODO: Documentation locations:
@@ -24,12 +30,6 @@ import numpy as np
 from tkinter import Tk
 from tkinter.filedialog import askopenfile
 
-# TODO: make this so I do not have to manually enter it. This Sheet is constantly changing. Maybe web scraping?
-
-#TODO: make GUI once everything else is complete.
-#     labelThisVarDifferent = askopenfile(title='Select File')  # shows dialog box and return the path
-#     # Tk.withdraw()
-
 
 # RTR Workbook variable
 fileNameRTR = "cCalRecycle_NorthBranch_DataManagerTicketExport.xlsx"
@@ -42,43 +42,6 @@ dfRTR = pd.read_excel(fileNameRTR) #,usecols=["Zone Name", "End Time", "Is Void"
 # pd.set_option('display.max_rows', 3000)
 # pd.set_option('display.max_columns', 3000)
 # pd.options.display.max_columns = None
-#TODO: how to make open and close file more automated*
-
-# Re-arrange Column order and pick columns wanted
-# dfRTR = dfRTR[["End Time", "Is Void", "Ticket Notes", "Service Code", "Unit Count", "Disposal Monitor Name", "Addr No",
-#                "Addr St", "Ticket Number"]]
-
-
-
-
-#  Figure out the weird APNs(In Zone Name), by hard coding, what they need to look like.
-#           Examples: 0203200600 should = 020-320-06-00 | 0203300500_#105 should = 020-330-05-00_#105
-#  The rest of the APNs by adding dashes and -000 for example 123456789 need to look like 123-456-789-000
-
-
-# dfRTR.to_excel("TestRTR.xlsx", index=False) # RTR save to an excel file if needed
-
-
-
-
-
-# TODO: Function for otal vehicle counts afeter checks. Graph for display*. ******************We need to do comparisions with/before this part******************.
-
-#TODO: Make a function that; get all the columns we need and compare to other excel sheet(s)
-# Rearrange column orders for RTR Data:
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 #TODO: getRTRVecCols() -----------------------> Vehicle Column Checks Setup- *Done*
@@ -103,15 +66,19 @@ def getRTRVecCols(dfRTR):
     for char in spec_chars:
         dfRTR["Service Code"] = dfRTR["Service Code"].str.replace(char, ' ', regex = True)
 
-    # with the above we may get white spaces. this is how to remove those
+    # with the above we may get white spaces. this is how to remove those by making it into a list
+    # and then joining them back to gether agian
     dfRTR["Service Code"] = dfRTR["Service Code"].str.split().str.join(" ")
 
-    # take in multiple values for in one column to filter for
+    # take in multiple values for in one column to filter for. *Will not work if i put separately in the isin() method*
     codes = ["CO4", "4"]
 
-    # filtering our data set with multiple conditon. 2 conditions is in the same cell
+    # filtering our data set with multiple condition. 2 conditions is in the same cell. *See Above*
     dfRTR = dfRTR[(dfRTR["Is Void"] != True) & (dfRTR["Service Code"].isin(codes))]
+
+    # add the date to the file name
     todaysDate = time.strftime("%m-%d-%y")
+    #makes our excel to run in VBA.
     dfRTR.to_excel('RTR Vec Cols ' + todaysDate + '.xlsx')
 
 getRTRVecCols(dfRTR)
