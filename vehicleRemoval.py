@@ -21,89 +21,14 @@ import time
 import matplotlib.pyplot as plt
 import numpy as np
 import usefulTools
-
 # from tkinter import Tk
 # from tkinter.filedialog import askopenfile
 
 
-# TODO: SS Excel Name: make this so I do not have to manually enter it. This Sheet is constanly changing. Maybe webscraping?
-# Smart Sheets Workbook variable
-fileNameSS = "Northern Branch Phase II Debris Removal Ops.xlsx"
 
-print("Opening Vehicle check program.....")
-df = pd.read_excel(fileNameSS)  # ,usecols= ['APN','Street #', 'Street Name','Debris Finish', 'Number of Vehicles',
-
-
-# 'Number of Vehicles Removed',  'County']) # index_col='APN' do this later after futher editing APNS
-# only way to display all columns and rows for my data set
-# pd.set_option('display.max_rows', 3000)
-# pd.set_option('display.max_columns', 3000)
-# pd.options.display.max_columns= None
-# pd.options.display.width= None
-# TODO: how to make open and close file more automated*
-
-
-# TODO: vecCheck  ----------------->Columns for vehicle checks
-
-
-def vecCheck(df):
-    df = df[['APN', 'Street #', 'Street Name', 'Debris Finish', 'Number of Vehicles',
-             'Number of Vehicles Removed', 'County']]
-    df = df.set_index("APN")
-    todaysDate = time.strftime("%m-%d-%y")
-    df.to_excel("SmartSheet Vehicle Set up " + todaysDate + ".xlsx")
-
-
-# vecCheck(df)
-
-
-# TODO: SScardCheck  --------------> Checks card locations in SMart Sheets
-def SScardCheck(df):
-    df = df[['APN', "Debris Crew", "Division", "County", "Debris Crew Leader/Crew#"]]
-    df = df.set_index("APN")
-    todaysDate = time.strftime("%m-%d-%y")
-    df.to_excel("Card Check " + todaysDate + ".xlsx")
-
-
-# SScardCheck(df)
-
-# TODO: sumVehicles(df) -------------> This will give us the total for number of vehicles and number of vehicles removed in an excel sheet
-def sumVehicles(df):
-    # make a copy of our data frame so we do not mess with the orginal
-    # also to prevent chained indexing.
-    df = df.copy()
-    # We have text in a number column(FILLNA), and we will need to covert from object to a numeric value for Number of Vehicles Removed & Number of Vehicles
-    df.loc[:, ['Number of Vehicles', 'Number of Vehicles Removed']] = df.loc[:, ['Number of Vehicles',
-                                                                                 'Number of Vehicles Removed']].fillna(0)
-    df.loc[:, "Number of Vehicles"] = pd.to_numeric(df.loc[:, "Number of Vehicles"], errors='coerce')
-    df.loc[:, "Number of Vehicles Removed"] = pd.to_numeric(df.loc[:, "Number of Vehicles Removed"], errors='coerce')
-
-    # vairable for isin()
-    Status = ("Withdrawal", "Ineligible")
-
-    # filter for butte county only, number of vhelice remove 0 only, take out "status" aka withdrawals anf ineligible
-    df = df[(df.loc[:, 'Number of Vehicles Removed'] == 0) & (df.loc[:, "County"] == "Butte") & (~df.loc[:, 'Structural Status'].isin(Status))]
-    df.loc[:, "Number of Vehicles"] = pd.to_numeric(df.loc[:, "Number of Vehicles"], errors='coerce')
-    df.loc[:, "Number of Vehicles Removed"] = pd.to_numeric(df.loc[:, "Number of Vehicles Removed"], errors='coerce')
-
-    # Get out math stuff done nuber of vehicles minus vechilces removed. See how many is left
-    df.loc[:, "Vehicles Left"] = df.loc[:, "Number of Vehicles"] - df.loc[:, "Number of Vehicles Removed"]
-    print(df.groupby("County")[["Number of Vehicles", "Number of Vehicles Removed", "Vehicles Left"]].sum())
-    # df.to_excel("Vehicles left test.xlsx")
-    # sums up all our counts for the columns named. We can send this to an excel if needed
-    return df.groupby("County")[["Number of Vehicles", "Number of Vehicles Removed", "Vehicles Left"]].sum()
-
-sumVehicles(df)
-
-#  # df.reset_index(inplace=True) #This will reset the index back to numbers
-
-
-# df.to_excel("SmartSheet Vehicle Set up.xlsx")
-
-
+#TODO: APNsetup(df)
 # removes all dashes then joins that together with no spaces for full APN & remove extras zeros from APNS
-
-# TODO: APNsetup(df) ------>  (Does not work...yet)
+# Skips APNs in uniqueAPNs
 uniqueAPNs = ["018-510-02-00_#19A", "018-530-04-00", "018-530-06-00_#17", "018-530-09-00", "018-530-10-00",
               "020-080-28-00_#24B","020-080-31-00", "020-320-06-00", "020-330-05-00_#105", "020-330-05-00_#106",
               "020-330-05-00_#107","020-330-05-00_#110", "020-340-14-00", "020-340-22-00", "020-340-36-00",
@@ -159,6 +84,7 @@ uniqueAPNs = ["018-510-02-00_#19A", "018-530-04-00", "018-530-06-00_#17", "018-5
 
 
 def APNsetup(df):
+    df = df.copy()
     df = df[['APN', 'Street #', 'Street Name', 'Debris Finish', 'Number of Vehicles',
              'Number of Vehicles Removed', 'County']]
 
@@ -171,17 +97,75 @@ def APNsetup(df):
 
 
 # APNsetup(df)
-# make a dict for trinity and other counties that have special APNs so skip next step and leave as is.
+# TODO: SS Excel Name: make this so I do not have to manually enter it. This Sheet is constanly changing. Maybe webscraping?
+# Smart Sheets Workbook variable
+fileNameSS = "Northern Branch Phase II Debris Removal Ops.xlsx"
 
-# remove extra zeros from APNS
+print("Opening Vehicle check program.....")
+df = pd.read_excel(fileNameSS)  # ,usecols= ['APN','Street #', 'Street Name','Debris Finish', 'Number of Vehicles',
 
 
+# 'Number of Vehicles Removed',  'County']) # index_col='APN' do this later after futher editing APNS
+# only way to display all columns and rows for my data set
+# pd.set_option('display.max_rows', 3000)
+# pd.set_option('display.max_columns', 3000)
+# pd.options.display.max_columns= None
+# pd.options.display.width= None
+# TODO: how to make open and close file more automated*
 
 
+# TODO: vecCheck  ----------------->Columns for vehicle checks
+def vecCheck(df):
+    df = df[['APN', 'Street #', 'Street Name', 'Debris Finish', 'Number of Vehicles',
+             'Number of Vehicles Removed', 'County']]
+    df = df.set_index("APN")
+    todaysDate = time.strftime("%m-%d-%y")
+    df.to_excel("SmartSheet Vehicle Set up " + todaysDate + ".xlsx")
+vecCheck(df)
 
-# TODO: getTotalCounts(df) ------>Graph out sheet->get graph to only count numbers, and number >0 ONLY!
+
+# TODO: SScardCheck  --------------> Checks card locations in SMart Sheets
+def SScardCheck(df):
+    df = df[['APN', "Debris Crew", "Division", "County", "Debris Crew Leader/Crew#"]]
+    df = df.set_index("APN")
+    todaysDate = time.strftime("%m-%d-%y")
+    df.to_excel("Card Check " + todaysDate + ".xlsx")
+# SScardCheck(df)
+
+
+# TODO: sumVehicles(df) -------------> This will give us the total for number of vehicles and number of vehicles removed in an excel sheet
+def sumVehicles(df): #Butte county only right now
+    # make a copy of our data frame so we do not mess with the original
+    # also to prevent chained indexing.
+    df = df.copy()
+    # We have text in a number column(FILLNA)
+    df.loc[:, ['Number of Vehicles', 'Number of Vehicles Removed']] = df.loc[:, ['Number of Vehicles',
+                                                                                 'Number of Vehicles Removed']].fillna(0)
+    # covert from object to a numeric value for Number of Vehicles Removed & Number of Vehicles
+    df.loc[:, "Number of Vehicles"] = pd.to_numeric(df.loc[:, "Number of Vehicles"], errors='coerce')
+    df.loc[:, "Number of Vehicles Removed"] = pd.to_numeric(df.loc[:, "Number of Vehicles Removed"], errors='coerce')
+
+    # vairable for isin()
+    Status = ("Withdrawal", "Ineligible")
+
+    # filter for butte county only, number of vhelice remove 0 only, take out "status" aka withdrawals anf ineligible
+    df = df[(df.loc[:, 'Number of Vehicles Removed'] == 0) & (df.loc[:, "County"] == "Butte") & (~df.loc[:, 'Structural Status'].isin(Status))]
+    df.loc[:, "Number of Vehicles"] = pd.to_numeric(df.loc[:, "Number of Vehicles"], errors='coerce')
+    df.loc[:, "Number of Vehicles Removed"] = pd.to_numeric(df.loc[:, "Number of Vehicles Removed"], errors='coerce')
+
+    # Get out math stuff done nuber of vehicles minus vechilces removed. See how many is left
+    df.loc[:, "Vehicles Left"] = df.loc[:, "Number of Vehicles"] - df.loc[:, "Number of Vehicles Removed"]
+    print(df.groupby("County")[["Number of Vehicles", "Number of Vehicles Removed", "Vehicles Left"]].sum())
+    # df.to_excel("Vehicles left test.xlsx")
+    # sums up all our counts for the columns named. We can send this to an excel if needed
+    return df.groupby("County")[["Number of Vehicles", "Number of Vehicles Removed", "Vehicles Left"]].sum()
+
+# sumVehicles(df)
+
+# TODO: getTotalCounts(df) ------>work on it not ready
+#  Graph out sheet->get graph to only count numbers, and number >0 ONLY!
 def getTotalCounts(df):  # this function is for getting counts by any way you need.
-    county = df.groupby(['County']).count()  # this will put "COUNTY"on Y-Axis and counts all the values from other columns
+    county = df #.groupby(['County']).count()  # this will put "COUNTY"on Y-Axis and counts all the values from other columns
     counts = county.loc[:,"Number of Vehicles Removed"]  # left side :  all rows , right side: is the column we want to look at. This is how we chose what we want to ount up
     # counts.to_excel("test3.xlsx") # if we use county we get counts for entier data set columns by county, if we use counts.to_excel() we only get vec removed column.
 
