@@ -1,3 +1,5 @@
+#TODO: Left here due to maek need to add more tasks later
+
 import pandas as pd
 import time
 
