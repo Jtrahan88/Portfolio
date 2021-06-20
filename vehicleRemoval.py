@@ -17,18 +17,16 @@
 
 import pandas as pd
 import time
-# import openpyxl
-import matplotlib.pyplot as plt
-import numpy as np
-import usefulTools
+# import matplotlib.pyplot as plt
+# import numpy as np
 # from tkinter import Tk
 # from tkinter.filedialog import askopenfile
 
 
 
-#TODO: APNsetup(df)
-# removes all dashes then joins that together with no spaces for full APN & remove extras zeros from APNS
-# Skips APNs in uniqueAPNs
+# TODO: APNsetup(df)
+# removes all dashes then joins that together with no spaces for full list of APNs & remove extras zeros from APNS
+# Skips APNs in uniqueAPNs list
 uniqueAPNs = ["018-510-02-00_#19A", "018-530-04-00", "018-530-06-00_#17", "018-530-09-00", "018-530-10-00",
               "020-080-28-00_#24B","020-080-31-00", "020-320-06-00", "020-330-05-00_#105", "020-330-05-00_#106",
               "020-330-05-00_#107","020-330-05-00_#110", "020-340-14-00", "020-340-22-00", "020-340-36-00",
@@ -84,14 +82,20 @@ uniqueAPNs = ["018-510-02-00_#19A", "018-530-04-00", "018-530-06-00_#17", "018-5
 
 
 def APNsetup(df):
+    # copy the data base to stoping index chaining
     df = df.copy()
+    # get columns we need
     df = df[['APN', 'Street #', 'Street Name', 'Debris Finish', 'Number of Vehicles',
              'Number of Vehicles Removed', 'County']]
 
-
+    #makes a place holders for getting rid of all the APN's dashes(-) and onlly leaves 9 digits
     df.loc[:,"Place Holder"] = df.loc[:,"APN"].str.replace("-", "").str[:9]
+    # uses a filter for the APN column to say all APNs not in uniqueAPNs list will eqaul all APNs in Place holder column
+    # except APNs in the uniqueAPNs list.
     df.loc[~df["APN"].isin(uniqueAPNs), "APN"] = df.loc[~df["APN"].isin(uniqueAPNs), "Place Holder"]
+    # sets our df with the APN as index for easy look up
     df = df.set_index("APN")
+    #makes an excel file with the days date it was created for sharing
     todaysDate = time.strftime("%m-%d-%y")
     df.to_excel("APN TEXT " + todaysDate + ".xlsx")
 
