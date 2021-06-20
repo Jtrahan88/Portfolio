@@ -32,10 +32,10 @@ from tkinter.filedialog import askopenfile
 
 
 # RTR Workbook variable
-fileNameRTR = "cCalRecycle_NorthBranch_DataManagerTicketExport.xlsx"
+fileNameRTR = "aDataManagerTicketExport.xlsx" # change name as needed. #TODO: have user select file with GUI
 
 print("Opening Vehicle check program.....")
-dfRTR = pd.read_excel(fileNameRTR) #,usecols=["Zone Name", "End Time", "Is Void", "Ticket Notes",
+df = pd.read_excel(fileNameRTR) #,usecols=["Zone Name", "End Time", "Is Void", "Ticket Notes",
                                            # "Service Code", "Unit Count", "Disposal Monitor Name", "Addr No",
                # "Addr St", "Ticket Number"], index_col="Zone Name")
 # pd.options.display.width= None #only way to display all columns and rows for my data set 2500cols x 119rows
@@ -46,6 +46,8 @@ dfRTR = pd.read_excel(fileNameRTR) #,usecols=["Zone Name", "End Time", "Is Void"
 
 #TODO: getRTRVecCols() -----------------------> Vehicle Column Checks Setup- *Done*
 def getRTRVecCols(dfRTR):
+    # create a copy of our df to stop index chaining
+    dfRTR = dfRTR.copy()
     # Pick columns needed
     dfRTR = dfRTR[["Zone Name", "End Time", "Is Void", "Ticket Notes","Service Code", "Unit Count", "Disposal Monitor Name",
                  "Addr No","Addr St", "Ticket Number"]]
@@ -74,11 +76,11 @@ def getRTRVecCols(dfRTR):
     codes = ["CO4", "4"]
 
     # filtering our data set with multiple condition. 2 conditions is in the same cell. *See Above*
-    dfRTR = dfRTR[(dfRTR["Is Void"] != True) & (dfRTR["Service Code"].isin(codes))]
+    dfRTR = dfRTR[(dfRTR.loc[:, "Is Void"] != True) & (dfRTR.loc[:, "Service Code"].isin(codes))]
 
     # add the date to the file name
     todaysDate = time.strftime("%m-%d-%y")
     #makes our excel to run in VBA.
     dfRTR.to_excel('RTR Vec Cols ' + todaysDate + '.xlsx')
 
-getRTRVecCols(dfRTR)
+getRTRVecCols(df)
