@@ -1,9 +1,13 @@
+#TODO: LEft here due to maek need to add more tasks later
+
 import pandas as pd
 
-fileName = 'North Branch CA Wildfires - Parcel Issues.csv'
+tree_file = 'North Branch CA Wildfires - Parcel Issues.xlsx'
 
-treeDf = pd.read_csv(fileName, usecols= ['APN','Tree Survey Date', 'House Number', 'Street Address',
-                                           'Are there hazards present on the property?', 'County','Number of Trees',
-                                           'Crew Leader', 'Arborist'], index_col='APN')
+df_tree = pd.read_excel(tree_file, sheet_name="TREE SURVEYS") # Tree Data
 
-treeDf.to_excel("Test Csv File.xlsx")
+def tree_cols(df):
+    df = df[["APN", "Tree Survey Date", "Number of Trees"]]
+    df = df.set_index("APN")
+    df.to_excel("Tree data Columns" + todaysDate + ".xlsx")
+tree_cols(df_tree)
