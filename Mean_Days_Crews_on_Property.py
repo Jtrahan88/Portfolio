@@ -45,7 +45,7 @@ def mean_crew_days_on_propert(df):
     dffilt = df.groupby(['County', 'Debris Crew WO#'])[["Duration"]].mean()
     dffilt.to_excel("Mean days on property.xlsx")
 
-    return df.groupby(['County', 'Debris Crew WO#'])[["Duration"]].mean()
+    return df.groupby(['County', 'Debris Crew WO#'])[["Duration"]].mean().round(2)
 
 
 print(mean_crew_days_on_propert(df))
