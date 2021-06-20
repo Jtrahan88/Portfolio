@@ -3,12 +3,14 @@
 
 
 import pandas as pd
+import time
 
 fileName = "Northern Branch Phase II Debris Removal Ops.xlsx" #insert your file name here
 df = pd.read_excel(fileName)
 
 # TODO: variable for crews needed and property status
 # our variables
+todaysDate = time.strftime("%m-%d-%y")
 status = ("Withdrawal", "Ineligible") # will use to take those properties out
 # if we only need certain crews change as needed
 active_crews = ["CREW#101", "CREW#102", "CREW#203", "CREW#301", "CREW#404", "CREW#501", "CREW#406", "CREW#304", "CREW#701",
@@ -47,7 +49,7 @@ def mean_crew_days_on_propert(df):
     dffilt = df.groupby(['County', 'Debris Crew WO#'])[["Duration"]].mean()
 
     #saves an excel for emailing
-    dffilt.to_excel("Mean days on property.xlsx")
+    dffilt.to_excel("Mean days on property " + todaysDate + ".xlsx")
     #prints it to the screen as well
     return df.groupby(['County', 'Debris Crew WO#'])[["Duration"]].mean().round(2)
 
