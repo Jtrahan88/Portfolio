@@ -2,19 +2,16 @@ import pandas as pd
 import numpy as np
 
 
-SAdf = 'TT_North Branch_Site Assessment.csv'
+sa_file = "state & Field Tracker/TT_North Branch_Site Assessment.xlsx"
+df_sa = pd.read_excel(sa_file, header=1) # SA data
 
-# df = pd.read_excel(SAdf, engine="openpyxl")
-df = pd.read_csv(SAdf, header=1, usecols=['APN','ST No.', 'Unit No.', 'ST Address', 'COUNTY','Date Completed',
-                                            'Automobiles','Chimney','Notes'],index_col='APN')
-# df = pd.read_excel(SAdf, header=1, index_col="APN")
-# pd.options.display.width = None
-# pd.options.display.max_columns= None
-# pd.set_option('display.max_rows', 2200)
-# pd.set_option('display.max_columns', 2200)
-
-df.to_excel("Test the csv file.xlsx")
-
+# TODO: sa_cols(df) ---> get columns ready for VBA
+def sa_cols(df):
+    df = df.copy()
+    df = df.loc[:, ["APN", "Date Completed", "Automobiles"]]
+    df = df.set_index("APN")
+    df.to_excel("SA data Columns " + todaysDate + ".xlsx")
+sa_cols(df_sa)
 
 
 
