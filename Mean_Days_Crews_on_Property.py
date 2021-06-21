@@ -40,9 +40,8 @@ def mean_crew_days_on_property(df):
     # take out the spaces in 'Debris Crew WO#'
     df['Debris Crew WO#'] = df['Debris Crew WO#'].str.replace(" ", "")
 
-    # use only active crews
+    # use only active crews if needed. 
     # df.loc[:, 'Debris Crew WO#'] = df[df.loc[:, 'Debris Crew WO#'].isin(active_crews)]
-    # dffilt = df.groupby(['County', 'Debris Crew WO#'])[["Duration"]].mean()
     dffilt = df[['County', 'Debris Crew WO#', "AVG Days on Site from: " + start_date + " to " + end_day]]\
         .groupby(['County', 'Debris Crew WO#']).mean().round(2).fillna(0)
     dffilt.to_excel("Mean days on property " + todaysDate + ".xlsx")
