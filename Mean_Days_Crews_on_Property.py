@@ -35,7 +35,7 @@ def mean_crew_days_on_propert(df):
     df = df[['APN', "Structural Status", 'County', 'Debris Crew', 'Debris Crew WO#', 'Debris Start',
              'Debris Finish', "AVG Days on Site from: " + start_date + " to " + end_day]]
 
-    # RE for filtering
+    # RE for filtering out the crew # from the Debris Crew WO# 
     df['Debris Crew WO#'] = df['Debris Crew WO#'].str.extract('(CREW ?# ?\d+)')
 
     # take out the spaces in 'Debris Crew WO#'
