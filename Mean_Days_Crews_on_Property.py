@@ -11,9 +11,10 @@ status = ("Withdrawal", "Ineligible") # will use to take those properties out
 active_crews = ["CREW#101", "CREW#102", "CREW#203", "CREW#301", "CREW#404", "CREW#501", "CREW#406", "CREW#304",
                 "CREW#701", "CREW#702", "CREW#703", "CREW#704", "CREW#705", "CREW#706",
                 "CREW#707" "CREW#708", "CREW#801", "CREW#802", "CREW#803", "CREW#805"]
+
 todaysDate = time.strftime("%m-%d-%y")
 
-def mean_crew_days_on_propert(df):
+def mean_crew_days_on_property(df):
     # filter out withdrawals and ineligible properties and dates needed
     df = df.copy()
     start_date = input("Put your start day in this format year-month-day (2021-05-01): ")
@@ -50,4 +51,4 @@ def mean_crew_days_on_propert(df):
         .groupby(['County', 'Debris Crew WO#']).mean().round(2).fillna(0)
 
 
-mean_crew_days_on_propert(df)
+mean_crew_days_on_property(df)
