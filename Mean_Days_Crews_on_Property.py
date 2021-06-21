@@ -1,10 +1,6 @@
-# TODO: find the mean for crews between certain date
-#  filter for crew we need and dates dont for get!
-
-
 import pandas as pd
 
-fileName = "Northern Branch Phase II Debris Removal Ops.xlsx" # insert your file name here
+fileName = "Vehicle Check/Northern Branch Phase II Debris Removal Ops.xlsx" # insert your file name here
 df = pd.read_excel(fileName)
 
 # TODO: variable for crews needed and property status
@@ -18,8 +14,8 @@ active_crews = ["CREW#101", "CREW#102", "CREW#203", "CREW#301", "CREW#404", "CRE
 def mean_crew_days_on_propert(df):
     # filter out withdrawals and ineligible properties and dates needed
     df = df.copy()
-    start_date = input("Put your start day in this format 2021-05-01: ")
-    end_day = input("Put your end day in this format 2021-06-19: ")
+    start_date = input("Put your start day in this format year-month-day (2021-05-01): ")
+    end_day = input("Put your end day in this format year-month-day (2021-06-19): ")
 
     df.loc[:, ['Debris Start', 'Debris Finish']] = df[(df.loc[:, 'Debris Start'] >= start_date) &
                                                       (df.loc[:, 'Debris Finish'] <= end_day)]
@@ -35,7 +31,7 @@ def mean_crew_days_on_propert(df):
     df = df[['APN', "Structural Status", 'County', 'Debris Crew', 'Debris Crew WO#', 'Debris Start',
              'Debris Finish', "AVG Days on Site from: " + start_date + " to " + end_day]]
 
-    # RE for filtering out the crew # from the Debris Crew WO# 
+    # RE for filtering
     df['Debris Crew WO#'] = df['Debris Crew WO#'].str.extract('(CREW ?# ?\d+)')
 
     # take out the spaces in 'Debris Crew WO#'
@@ -53,17 +49,3 @@ def mean_crew_days_on_propert(df):
 
 
 print(mean_crew_days_on_propert(df))
-
-
-
-
-
-
-
-
-
-
-
-
-
-
