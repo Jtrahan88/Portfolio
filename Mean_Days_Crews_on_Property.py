@@ -1,4 +1,5 @@
 import pandas as pd
+import time
 
 fileName = "Vehicle Check/Northern Branch Phase II Debris Removal Ops.xlsx" # insert your file name here
 df = pd.read_excel(fileName)
@@ -10,6 +11,7 @@ status = ("Withdrawal", "Ineligible") # will use to take those properties out
 active_crews = ["CREW#101", "CREW#102", "CREW#203", "CREW#301", "CREW#404", "CREW#501", "CREW#406", "CREW#304",
                 "CREW#701", "CREW#702", "CREW#703", "CREW#704", "CREW#705", "CREW#706",
                 "CREW#707" "CREW#708", "CREW#801", "CREW#802", "CREW#803", "CREW#805"]
+todaysDate = time.strftime("%m-%d-%y")
 
 def mean_crew_days_on_propert(df):
     # filter out withdrawals and ineligible properties and dates needed
@@ -42,10 +44,10 @@ def mean_crew_days_on_propert(df):
     # dffilt = df.groupby(['County', 'Debris Crew WO#'])[["Duration"]].mean()
     dffilt = df[['County', 'Debris Crew WO#', "AVG Days on Site from: " + start_date + " to " + end_day]]\
         .groupby(['County', 'Debris Crew WO#']).mean().round(2).fillna(0)
-    dffilt.to_excel("Mean days on property.xlsx")
+    dffilt.to_excel("Mean days on property " + todaysDate + ".xlsx")
 
     return df[['County', 'Debris Crew WO#', "AVG Days on Site from: " + start_date + " to " + end_day]]\
         .groupby(['County', 'Debris Crew WO#']).mean().round(2).fillna(0)
 
 
-print(mean_crew_days_on_propert(df))
+mean_crew_days_on_propert(df)
