@@ -1,7 +1,7 @@
 import pandas as pd
 import time
 
-fileName = "Vehicle Check/Northern Branch Phase II Debris Removal Ops.xlsx" # insert your file name here
+fileName = "Northern Branch Phase II Debris Removal Ops.xlsx" # insert your file name here
 df = pd.read_excel(fileName)
 
 # TODO: variable for crews needed and property status
@@ -24,10 +24,10 @@ def mean_crew_days_on_property(df):
                                                       (df.loc[:, 'Debris Finish'] <= end_day)]
     df.loc[:,  "Structural Status"] = (~df.loc[:, "Structural Status"].isin(status))
 
-    # duration - finish day minus start day
+    # AVG Days on Site from - finish day minus start day
     df.loc[:, "AVG Days on Site from: " + start_date + " to " + end_day] = df.loc[:, 'Debris Finish'] - df.loc[:, 'Debris Start']
 
-    # convert 'duration' column to a float instead of timedelta64[ns]
+    # convert 'AVG Days on Site from' column to a float instead of timedelta64[ns]
     df["AVG Days on Site from: " + start_date + " to " + end_day] = df["AVG Days on Site from: " + start_date + " to " + end_day].dt.days
 
     # Filter columns we need
@@ -39,8 +39,8 @@ def mean_crew_days_on_property(df):
 
     # take out the spaces in 'Debris Crew WO#'
     df['Debris Crew WO#'] = df['Debris Crew WO#'].str.replace(" ", "")
-
-    # use only active crews if needed. 
+    # df.to_excel("Mean Median Mode test.xlsx")
+    # use only active crews if needed.
     # df.loc[:, 'Debris Crew WO#'] = df[df.loc[:, 'Debris Crew WO#'].isin(active_crews)]
     dffilt = df[['County', 'Debris Crew WO#', "AVG Days on Site from: " + start_date + " to " + end_day]]\
         .groupby(['County', 'Debris Crew WO#']).mean().round(2).fillna(0)
