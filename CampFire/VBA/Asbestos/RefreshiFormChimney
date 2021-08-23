@@ -1,0 +1,44 @@
+Public Sub RefreshiFChim_Click()
+
+Dim iFChim_File As String
+Dim iFChim_LastMod As Date
+Dim SourceWB As Workbook
+Dim TargetWB As Workbook
+
+Call Initialize ' Get sheet names etc
+OriginalSheet = ActiveSheet.Name
+
+Do While "Never" <> "End"
+
+    Call GetLatestFile(iFrmChimFolder, InitGlobal.iFChimFileName, iFChim_File, iFChim_LastMod)
+
+    If iFChim_File > "" And iFChim_LastMod <> Worksheets("File Updates").Range("C9").Value Then
+        If TabExists(InitGlobal.iFChimTab) Then DeleteTab (InitGlobal.iFChimTab)
+        Worksheets("File Updates").Range("C9").Value = ""  'Wipe out file update date/time
+    
+        Application.ScreenUpdating = False
+        Set SourceWB = Workbooks.Open(iFChim_File)
+        Set TargetWB = ThisWorkbook
+        SourceWB.Sheets(InitGlobal.iFChimTab).Copy After:=TargetWB.Sheets(TargetWB.Sheets.Count)
+        SourceWB.Close False
+        Worksheets("File Updates").Range("C9").Value = iFChim_LastMod
+        Exit Do
+    Else
+        If iFChim_File > "" Then Exit Do
+        BoxType = vbRetryCancel + vbCritical
+        If MsgBox("No iForm Chimney file found to import", BoxType) = vbCancel Then Exit Do
+    End If
+Loop
+
+'Update global variables that hold column numbers to deal with the additional column
+Call Initialize
+Sheets(InitGlobal.iFChimTab).Visible = xlHidden
+Sheets(OriginalSheet).Activate
+Application.ScreenUpdating = True
+
+End Sub
+
+
+
+
+
