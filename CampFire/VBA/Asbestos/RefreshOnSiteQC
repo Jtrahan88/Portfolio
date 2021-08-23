@@ -1,0 +1,44 @@
+Public Sub RefreshOnSiteQC_Click()
+
+Dim OnSiteQC_File As String
+Dim OnSiteQC_LastMod As Date
+Dim SourceWB As Workbook
+Dim TargetWB As Workbook
+
+Call Initialize ' Get sheet names etc
+OriginalSheet = ActiveSheet.Name
+
+Do While "Never" <> "End"
+
+    Call GetLatestFile(OnSiteFolder, InitGlobal.OnSiteFileName, OnSiteQC_File, OnSiteQC_LastMod)
+
+    If OnSiteQC_File > "" And OnSiteQC_LastMod <> Worksheets("File Updates").Range("C5").Value Then
+        If TabExists(InitGlobal.OnSiteTab) Then DeleteTab (InitGlobal.OnSiteTab)
+        Worksheets("File Updates").Range("C6").Value = ""  'Wipe out file update date/time
+    
+        Application.ScreenUpdating = False
+        Set SourceWB = Workbooks.Open(OnSiteQC_File)
+        Set TargetWB = ThisWorkbook
+        SourceWB.Sheets(InitGlobal.OnSiteTab).Copy After:=TargetWB.Sheets(TargetWB.Sheets.Count)
+        SourceWB.Close False
+        Sheets(InitGlobal.OnSiteTab).Rows(1).Delete
+        Worksheets("File Updates").Range("C6").Value = OnSiteQC_LastMod
+        Exit Do
+    Else
+        If OnSiteQC_File > "" Then Exit Do
+        BoxType = vbRetryCancel + vbCritical
+        If MsgBox("No On Site QC file found to import", BoxType) = vbCancel Then Exit Do
+    End If
+Loop
+
+'Update global variables that hold column numbers to deal with the additional column
+Call Initialize
+Sheets(InitGlobal.OnSiteTab).Visible = xlHidden
+Sheets(OriginalSheet).Activate
+Application.ScreenUpdating = True
+
+End Sub
+
+
+
+
