@@ -1,0 +1,228 @@
+' Returns True if a tab exists, False if it does not
+Function TabExists(TabName As String) As Boolean
+
+On Error Resume Next
+TabExists = (ActiveWorkbook.Sheets(TabName).Name <> "")
+On Error GoTo 0
+
+End Function
+
+' Deletes the tab that was passed in
+Function DeleteTab(TabName As String)
+
+Application.DisplayAlerts = False
+Worksheets(TabName).Delete
+Application.DisplayAlerts = True
+
+End Function
+
+'Finds the latest file of a given prefix in the same folder as this spreadsheet
+Public Sub GetLatestFile(SearchPath As String, Prefix, LatestFileName, LastMod)
+
+Dim Files(0 To 32767) As String
+Dim Dates(0 To 32767) As Date
+
+' Get contents of the current directory
+FileName = Dir(SearchPath & "\" & Prefix)
+idx = 1
+Do While FileName <> ""
+    If FileName <> "." And FileName <> ".." Then
+        Files(idx) = SearchPath + "\" + FileName
+        Set fs = CreateObject("Scripting.FileSystemObject")
+        Dates(idx) = fs.GetFile(Files(idx)).DateLastAccessed
+        idx = idx + 1
+    End If
+    FileName = Dir()
+Loop
+
+'Sort the files in descending date/time order
+ For x = 1 To idx
+    For y = x To idx
+      If Dates(y) > Dates(x) Then
+        TempFile = Files(x)
+        TempDate = Dates(x)
+        Files(x) = Files(y)
+        Dates(x) = Dates(y)
+        Files(y) = TempFile
+        Dates(y) = TempDate
+      End If
+     Next y
+  Next x
+
+LatestFileName = Files(1)
+LastMod = Dates(1)
+
+End Sub
+
+'Retrieve the column number of a column heading in the specified tab
+Function HeadingColumn(HeadingToFind As String, SheetToSearch As String, RowToSearch As Integer, DisplayError As Boolean) As Integer
+
+LastColumn = Sheets(SheetToSearch).Range(Sheets(SheetToSearch).Cells(RowToSearch, 16384), Sheets(SheetToSearch).Cells(RowToSearch, 16384)).End(xlToLeft).Column
+
+If IsError(Application.Match(HeadingToFind, Sheets(SheetToSearch).Range(Sheets(SheetToSearch).Cells(RowToSearch, 1), _
+                                            Sheets(SheetToSearch).Cells(RowToSearch, LastColumn)), False)) Then
+    HeadingColumn = 0
+    If DisplayError Then MsgBox ("Column heading """ & HeadingToFind & """ not found in sheet " & SheetToSearch)
+Else
+    HeadingColumn = Application.Match(HeadingToFind, Sheets(SheetToSearch).Range(Sheets(SheetToSearch).Cells(RowToSearch, 1), _
+                                                     Sheets(SheetToSearch).Cells(RowToSearch, LastColumn)), False)
+End If
+
+End Function
+
+'Correct Dashboard dates (stored in GMT)
+Function DashDate(DateInV As Variant) As Variant
+
+Dim DST_Start As Date
+Dim DST_End As Date
+Dim DateIn As Date
+
+If IsError(DateInV) Then
+    DashDate = CVErr(xlErrNA)
+    Exit Function
+End If
+
+If DateInV = 0 Then
+    DashDate = 0
+    Exit Function
+End If
+
+DST_Start = #3/10/2019#
+DST_End = #11/3/2019#
+GMT_Offset = -7
+DateIn = DateInV
+If DateIn < DST_Start Or DateIn > DST_End Then GMT_Offset = GMT_Offset - 1
+DashDate = DateAdd("H", GMT_Offset, DateInV)
+DashDate = Int(DateAdd("S", 1, DashDate)) ' VBA doesn't like subtracting hours back to midnight, incorrectly calcs date as previous day
+
+End Function
+
+'Prompt user to specify the folder to find a given type of file
+Function ChangeFolder(Current As String) As String
+
+Dim Folder As FileDialog
+  
+Set Folder = Application.FileDialog(msoFileDialogFolderPicker)
+With Folder
+    .AllowMultiSelect = False
+    .Title = "Select Folder to Search for Files"
+    .InitialFileName = Current
+    If .Show = -1 Then ChangeFolder = .SelectedItems(1)
+End With
+    
+If ChangeFolder = "" Then
+    If Current = "" Then ChangeFolder = ThisWorkbook.Path Else ChangeFolder = Current
+End If
+
+End Function
+
+Function FixFormula(Formula As String, OldRow As Long, NewRow As Long) As String
+
+If OldRow <> NewRow Then
+
+    TextRow = Format(OldRow, "#######")
+    Do While InStr(Formula, TextRow) > 0
+        Pos = InStr(Formula, TextRow)
+        Formula = Left(Formula, Pos - 1) & Format(NewRow, "#######") & Right(Formula, Len(Formula) - Pos - Len(TextRow) + 1)
+    Loop
+    
+End If
+FixFormula = Formula
+
+End Function
+
+'Attempt to refresh all of the data
+Sub RefreshAll_Click()
+
+Call RefreshBFI_Click
+Call RefreshDailyQC_Click
+Call RefreshDash_Click
+Call RefreshOnSiteQC_Click
+Call RefreshRTR_Click
+Call RefreshiFSurvey_Click
+Call RefreshiFChim_Click
+Call RefreshiFAbate_Click
+Call SetFolders
+
+End Sub
+
+Sub SetFolders()
+
+For Each Cell In Sheets("File Updates").Range("D3:D10")
+    If Cell.Value = "" Then Cell.Value = ThisWorkbook.Path
+Next Cell
+
+BFIFolder = Sheets("File Updates").Range("D3")
+DashFolder = Sheets("File Updates").Range("D5")
+OnSiteFolder = Sheets("File Updates").Range("D6")
+DailyQCFolder = Sheets("File Updates").Range("D4")
+RTRFolder = Sheets("File Updates").Range("D7")
+iFrmSurveyFolder = Sheets("File Updates").Range("D8")
+iFrmChimFolder = Sheets("File Updates").Range("D9")
+iFrmAbateFolder = Sheets("File Updates").Range("D10")
+
+End Sub
+
+Sub AllFolders_Click()
+
+ActiveSheet.Range("D3:D10").Value = ChangeFolder(ThisWorkbook.Path)
+Call SetFolders
+
+End Sub
+
+Sub BFIFolder_Click()
+
+ActiveSheet.Range("D3").Value = ChangeFolder(ActiveSheet.Range("D3").Value)
+Call SetFolders
+ 
+End Sub
+
+Sub DashFolder_Click()
+
+ActiveSheet.Range("D5").Value = ChangeFolder(ActiveSheet.Range("D4").Value)
+Call SetFolders
+ 
+End Sub
+
+Sub OnSiteFolder_Click()
+
+ActiveSheet.Range("D6").Value = ChangeFolder(ActiveSheet.Range("D5").Value)
+Call SetFolders
+ 
+End Sub
+
+Sub DailyQCFolder_Click()
+
+ActiveSheet.Range("D4").Value = ChangeFolder(ActiveSheet.Range("D6").Value)
+Call SetFolders
+ 
+End Sub
+
+Sub RTRFolder_Click()
+
+ActiveSheet.Range("D7").Value = ChangeFolder(ActiveSheet.Range("D7").Value)
+Call SetFolders
+ 
+End Sub
+Sub iFormSurveyFolder_Click()
+
+ActiveSheet.Range("D8").Value = ChangeFolder(ActiveSheet.Range("D8").Value)
+Call SetFolders
+ 
+End Sub
+
+Sub iFormChimneyFolder_Click()
+
+ActiveSheet.Range("D9").Value = ChangeFolder(ActiveSheet.Range("D9").Value)
+Call SetFolders
+ 
+End Sub
+Sub iFormAbateFolder_Click()
+
+ActiveSheet.Range("D10").Value = ChangeFolder(ActiveSheet.Range("D10").Value)
+Call SetFolders
+ 
+End Sub
+
+
+
