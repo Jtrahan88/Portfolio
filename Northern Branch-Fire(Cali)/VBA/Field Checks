@@ -1,0 +1,606 @@
+'Disaster Relief Tracker-In VBA Code:
+
+
+
+Sub CallALL()
+
+Application.ScreenUpdating = False
+
+Call SiteAssessment
+Call Asbestos
+Call TREEDATA
+Call Soil
+Call SmartSheets
+Call Matching
+
+Application.ScreenUpdating = True
+
+End Sub
+Sub SiteAssessment()
+'
+' SiteAssessment Macro
+'
+' Keyboard Shortcut: Ctrl+Shift+S
+Application.ScreenUpdating = False
+'
+
+Sheets("Site Assessment").Select
+Rows("1:1").Select
+    Selection.Delete Shift:=xlUp
+
+Dim currentColumn As Integer
+Dim columnHeading As String
+
+For currentColumn = ActiveSheet.UsedRange.Columns.Count To 1 Step -1
+    columnHeading = ActiveSheet.UsedRange.Cells(1, currentColumn).Value
+
+'Check whether to preserve the column
+    Select Case columnHeading
+    'Insert name of columns to preserve
+        Case "APN", "Date Completed", "Automobiles"
+            'Do nothing
+        Case Else
+            'Delete the column
+            ActiveSheet.Columns(currentColumn).Delete
+        End Select
+    Next
+    
+    Cells.Select
+    Cells.EntireColumn.AutoFit
+    
+    Sheets("Audit").Select
+    
+    'SA DATE COMPLETED
+    Range("AA3").Select
+    Selection.Value = "=VLOOKUP(B3,'Site Assessment'!A:C,2,FALSE)"
+    Selection.AutoFill Destination:=Range("AA3:AA" & Range("B" & Rows.Count).End(xlUp).Row)
+    Range(Selection, Selection.End(xlDown)).Select
+    
+    'AUTOMOBILE COUNT
+    Range("AD3").Select
+    Selection.Value = "=VLOOKUP(B3,'Site Assessment'!A:C,3,FALSE)"
+    Selection.AutoFill Destination:=Range("AD3:AD" & Range("B" & Rows.Count).End(xlUp).Row)
+    Range(Selection, Selection.End(xlDown)).Select
+    
+    Range("A1").Select
+    
+    Application.ScreenUpdating = True
+End Sub
+
+Sub Asbestos()
+'
+' Asbestos Macro
+'
+' Keyboard Shortcut: Ctrl+Shift+A
+Application.ScreenUpdating = False
+'
+Sheets("Asbestos").Select
+Rows("1:1").Select
+    Selection.Delete Shift:=xlUp
+
+Dim currentColumn As Integer
+Dim columnHeading As String
+
+For currentColumn = ActiveSheet.UsedRange.Columns.Count To 1 Step -1
+    columnHeading = ActiveSheet.UsedRange.Cells(1, currentColumn).Value
+
+'Check whether to preserve the column
+    Select Case columnHeading
+    'Insert name of columns to preserve
+        Case "APN", "Date Collected", "Tt Received Date", "Final Results", "Point Count Needed?", "Point Count Results", "Chimney", "NESHAP Walls", "CHIM TIP (DATE)", _
+        "Chimney Finding", "Asbestos Abatement Completed Date", "Chimney Abatement Completed Date", "No. of Samples"
+            'Do nothing
+        Case Else
+            'Delete the column
+            ActiveSheet.Columns(currentColumn).Delete
+        End Select
+    Next
+    
+    Cells.Select
+    Cells.EntireColumn.AutoFit
+    
+    'Place the column headers in the end result order you want.
+  arrColOrder = Array("APN", "Date Collected", "Tt Received Date", "Final Results", "Point Count Needed?", "Point Count Results", _
+  , "Chimney", "NESHAP Walls", "CHIM TIP (DATE)", "Chimney Finding", _
+  "Asbestos Abatement Completed Date", "Chimney Abatement Completed Date", "No. of Samples")
+ 
+  counter = 1
+ 
+  Application.ScreenUpdating = False
+ 
+  For ndx = LBound(arrColOrder) To UBound(arrColOrder)
+ 
+  Set Found = Rows("1:1").Find(arrColOrder(ndx), LookIn:=xlValues, LookAt:=xlWhole, _
+  SearchOrder:=xlByColumns, SearchDirection:=xlNext, MatchCase:=False)
+ 
+  If Not Found Is Nothing Then
+  If Found.Column <> counter Then
+  Found.EntireColumn.Cut
+  Columns(counter).Insert Shift:=xlToRight
+  Application.CutCopyMode = False
+  End If
+  counter = counter + 1
+  End If
+ 
+  Next ndx
+ 
+    
+    Sheets("Audit").Select
+    
+    'DATE COLLECTED
+    Range("D3").Select
+    Selection.Value = "=VLOOKUP(B3,Asbestos!A:M,2,FALSE)"
+    Selection.AutoFill Destination:=Range("D3:D" & Range("B" & Rows.Count).End(xlUp).Row)
+    Range(Selection, Selection.End(xlDown)).Select
+    
+    'TT RECEIVED
+    Range("G3").Select
+    Selection.Value = "=VLOOKUP(B3,Asbestos!A:M,3,FALSE)"
+    Selection.AutoFill Destination:=Range("G3:G" & Range("B" & Rows.Count).End(xlUp).Row)
+    Range(Selection, Selection.End(xlDown)).Select
+   
+    'FINAL RESULTS
+    Range("J3").Select
+    Selection.Value = "=VLOOKUP(B3,Asbestos!A:M,4,FALSE)"
+    Selection.AutoFill Destination:=Range("J3:J" & Range("B" & Rows.Count).End(xlUp).Row)
+    Range(Selection, Selection.End(xlDown)).Select
+    
+    'Sample Count aka were samples taken
+    Range("L3").Select
+    Selection.Value = "=VLOOKUP(B3,Asbestos!A:M,13,FALSE)"
+    Selection.AutoFill Destination:=Range("L3:L" & Range("B" & Rows.Count).End(xlUp).Row)
+    Range(Selection, Selection.End(xlDown)).Select
+    
+    ' Point Count Needed?
+    Range("M3").Select
+    Selection.Value = "=VLOOKUP(B3,Asbestos!A:M,5,FALSE)"
+    Selection.AutoFill Destination:=Range("M3:M" & Range("B" & Rows.Count).End(xlUp).Row)
+    Range(Selection, Selection.End(xlDown)).Select
+    
+    'Point Count Results
+    Range("N3").Select
+    Selection.Value = "=VLOOKUP(B3,Asbestos!A:M,6,FALSE)"
+    Selection.AutoFill Destination:=Range("N3:N" & Range("B" & Rows.Count).End(xlUp).Row)
+    Range(Selection, Selection.End(xlDown)).Select
+    
+    
+    'iS THERE A CHIMNEY
+    Range("O3").Select
+    Selection.Value = "=VLOOKUP(B3,Asbestos!A:M,7,FALSE)"
+    Selection.AutoFill Destination:=Range("O3:O" & Range("B" & Rows.Count).End(xlUp).Row)
+    Range(Selection, Selection.End(xlDown)).Select
+    
+    'IS THERE NESHAP WALLS
+    Range("Q3").Select
+    Selection.Value = "=VLOOKUP(B3,Asbestos!A:M,8,FALSE)"
+    Selection.AutoFill Destination:=Range("Q3:Q" & Range("B" & Rows.Count).End(xlUp).Row)
+    Range(Selection, Selection.End(xlDown)).Select
+    
+    'cHIMNEY TIP DATE
+    Range("S3").Select
+    Selection.Value = "=VLOOKUP(B3,Asbestos!A:M,9,FALSE)"
+    Selection.AutoFill Destination:=Range("S3:S" & Range("B" & Rows.Count).End(xlUp).Row)
+    Range(Selection, Selection.End(xlDown)).Select
+    
+    'IS THE CHIMNEY POSTITIVE FOR ASBESTOS
+    Range("V3").Select
+    Selection.Value = "=VLOOKUP(B3,Asbestos!A:M,10,FALSE)"
+    Selection.AutoFill Destination:=Range("V3:V" & Range("B" & Rows.Count).End(xlUp).Row)
+    Range(Selection, Selection.End(xlDown)).Select
+    
+    'ASBESTOS ABATEMENT COMPLETED
+    Range("W3").Select
+    Selection.Value = "=VLOOKUP(B3,Asbestos!A:M,11,FALSE)"
+    Selection.AutoFill Destination:=Range("W3:W" & Range("B" & Rows.Count).End(xlUp).Row)
+    Range(Selection, Selection.End(xlDown)).Select
+    
+    'cHIMNEY ABATEMENT COMPLETED YES/NO
+    Range("Z3").Select
+    Selection.Value = "=VLOOKUP(B3,Asbestos!A:M,12,FALSE)"
+    Selection.AutoFill Destination:=Range("Z3:Z" & Range("B" & Rows.Count).End(xlUp).Row)
+    Range(Selection, Selection.End(xlDown)).Select
+    
+    Range("A1").Select
+    
+    Application.ScreenUpdating = True
+    
+End Sub
+Sub TREEDATA()
+'
+' TreeData Macro
+'
+' Keyboard Shortcut: Ctrl+Shift+T
+Application.ScreenUpdating = False
+'
+Sheets("TREE DATA").Select
+
+Dim currentColumn As Integer
+Dim columnHeading As String
+Dim arrColOrder As Variant, ndx As Integer
+Dim Found As Range, counter As Integer
+
+For currentColumn = ActiveSheet.UsedRange.Columns.Count To 1 Step -1
+    columnHeading = ActiveSheet.UsedRange.Cells(1, currentColumn).Value
+
+'Check whether to preserve the column
+    Select Case columnHeading
+    'Insert name of columns to preserve
+        Case "APN", "Tree Survey Date", "Number of Trees"
+            'Do nothing
+        Case Else
+            'Delete the column
+            ActiveSheet.Columns(currentColumn).Delete
+        End Select
+    Next
+    
+    Cells.Select
+    Cells.EntireColumn.AutoFit
+    
+    Range("A1").Select
+ 
+  'Place the column headers in the end result order you want.
+  arrColOrder = Array("APN", "Tree Survey Date", "Number of Trees")
+ 
+  counter = 1
+ 
+ 
+  For ndx = LBound(arrColOrder) To UBound(arrColOrder)
+ 
+  Set Found = Rows("1:1").Find(arrColOrder(ndx), LookIn:=xlValues, LookAt:=xlWhole, _
+  SearchOrder:=xlByColumns, SearchDirection:=xlNext, MatchCase:=False)
+ 
+  If Not Found Is Nothing Then
+  If Found.Column <> counter Then
+  Found.EntireColumn.Cut
+  Columns(counter).Insert Shift:=xlToRight
+  Application.CutCopyMode = False
+  End If
+  counter = counter + 1
+  End If
+ 
+  Next ndx
+ 
+  
+    
+    
+    '# OF TREES
+    Sheets("Audit").Select
+    Range("AI3").Select
+    Selection.Value = "=VLOOKUP(B3,'TREE DATA'!A:C,3,FALSE)"
+    Selection.AutoFill Destination:=Range("AI3:AI" & Range("B" & Rows.Count).End(xlUp).Row)
+    Range(Selection, Selection.End(xlDown)).Select
+    
+    'TREE SURVEY DATE
+    Range("AL3").Select
+    Selection.Value = "=VLOOKUP(B3,'TREE DATA'!A:C,2,FALSE)"
+    Selection.AutoFill Destination:=Range("AL3:AL" & Range("B" & Rows.Count).End(xlUp).Row)
+    Range(Selection, Selection.End(xlDown)).Select
+    
+    Application.ScreenUpdating = True
+    
+    
+End Sub
+Sub SmartSheets()
+'
+' SmartSheets Macro
+'
+' Keyboard Shortcut: Ctrl+Shift+M
+Application.ScreenUpdating = False
+'
+    Sheets("Northern Branch Phase II Debris").Select
+    Cells.Select
+    With Selection.Interior
+        .Pattern = xlNone
+    End With
+    With Selection.Font
+        .ColorIndex = xlAutomatic
+    End With
+
+
+
+Dim currentColumn As Integer
+Dim columnHeading As String
+
+For currentColumn = ActiveSheet.UsedRange.Columns.Count To 1 Step -1
+    columnHeading = ActiveSheet.UsedRange.Cells(1, currentColumn).Value
+
+'Check whether to preserve the column
+    Select Case columnHeading
+    'Insert name of columns to preserve
+        Case "APN", "County", "Structural Status", "Site Assessment", "Chimney", "NESHAP Walls", "Chimney Tipped", _
+        "Number of Vehicles", "Haz Trees Assessment", "# of Trees", "ASB Assessment", "ASB Results Received", "ASB Results", "ASB Abatement", "Number of Vehicles Removed", "Soil Sample"
+            'Do nothing
+        Case Else
+            'Delete the columns not wanted/ listed above
+            ActiveSheet.Columns(currentColumn).Delete
+        End Select
+    Next
+    
+      'List the column headers in the end result order you want to keep them.
+  arrColOrder = Array("APN", "County", "Structural Status", "Site Assessment", "Chimney", "NESHAP Walls", "Chimney Tipped", _
+        "Number of Vehicles", "Haz Trees Assessment", "# of Trees", "ASB Assessment", "ASB Results Received", "ASB Results", "ASB Abatement", "Number of Vehicles Removed", "Soil Sample")
+ 
+  counter = 1
+ 
+ 'LOOPS THAT MOVES COLUMNS AROUND BY ABOVE CODE SO THEY APPEAR IN THE ORDER YOU SPECIFIED.
+  For ndx = LBound(arrColOrder) To UBound(arrColOrder)
+ 
+  Set Found = Rows("1:1").Find(arrColOrder(ndx), LookIn:=xlValues, LookAt:=xlWhole, _
+  SearchOrder:=xlByColumns, SearchDirection:=xlNext, MatchCase:=False)
+ 
+  If Not Found Is Nothing Then
+  If Found.Column <> counter Then
+  Found.EntireColumn.Cut
+  Columns(counter).Insert Shift:=xlToRight
+  Application.CutCopyMode = False
+  End If
+  counter = counter + 1
+  End If
+ 
+  Next ndx
+ 
+    Cells.Select
+    Cells.EntireColumn.AutoFit
+    
+    Sheets("Audit").Select
+    
+        'Structural status
+    Range("C3").Select
+    Selection.Value = "=VLOOKUP(A3,'Northern Branch Phase II Debris'!A:C,3,FALSE)"
+    Selection.AutoFill Destination:=Range("C3:C" & Range("A" & Rows.Count).End(xlUp).Row)
+    Range(Selection, Selection.End(xlDown)).Select
+    
+    'ASB Assessment
+    Range("E3").Select
+    Selection.Value = "=VLOOKUP(A3,'Northern Branch Phase II Debris'!A:N,11,FALSE)"
+    Selection.AutoFill Destination:=Range("E3:E" & Range("A" & Rows.Count).End(xlUp).Row)
+    Range(Selection, Selection.End(xlDown)).Select
+    
+    'Asb Results Received DATE
+    Range("H3").Select
+    Selection.Value = "=VLOOKUP(A3,'Northern Branch Phase II Debris'!A:N,12,FALSE)"
+    Selection.AutoFill Destination:=Range("H3:H" & Range("A" & Rows.Count).End(xlUp).Row)
+    Range(Selection, Selection.End(xlDown)).Select
+    
+    'ASB Results
+    Range("K3").Select
+    Selection.Value = "=VLOOKUP(A3,'Northern Branch Phase II Debris'!A:N,13,FALSE)"
+    Selection.AutoFill Destination:=Range("K3:K" & Range("A" & Rows.Count).End(xlUp).Row)
+    Range(Selection, Selection.End(xlDown)).Select
+    
+    'Chimney
+    Range("P3").Select
+    Selection.Value = "=VLOOKUP(A3,'Northern Branch Phase II Debris'!A:N,5,FALSE)"
+    Selection.AutoFill Destination:=Range("P3:P" & Range("A" & Rows.Count).End(xlUp).Row)
+    Range(Selection, Selection.End(xlDown)).Select
+    
+     'NESHAP Walls
+    Range("R3").Select
+    Selection.Value = "=VLOOKUP(A3,'Northern Branch Phase II Debris'!A:N,6,FALSE)"
+    Selection.AutoFill Destination:=Range("R3:R" & Range("A" & Rows.Count).End(xlUp).Row)
+    Range(Selection, Selection.End(xlDown)).Select
+    
+    'Chimney Tipped DATE
+    Range("T3").Select
+    Selection.Value = "=VLOOKUP(A3,'Northern Branch Phase II Debris'!A:N,7,FALSE)"
+    Selection.AutoFill Destination:=Range("T3:T" & Range("A" & Rows.Count).End(xlUp).Row)
+    Range(Selection, Selection.End(xlDown)).Select
+    
+    'ASB Abatement
+    Range("X3").Select
+    Selection.Value = "=VLOOKUP(A3,'Northern Branch Phase II Debris'!A:N,14,FALSE)"
+    Selection.AutoFill Destination:=Range("X3:X" & Range("A" & Rows.Count).End(xlUp).Row)
+    Range(Selection, Selection.End(xlDown)).Select
+    
+    'Site Assessment
+    Range("AB3").Select
+    Selection.Value = "=VLOOKUP(A3,'Northern Branch Phase II Debris'!A:D,4,FALSE)"
+    Selection.AutoFill Destination:=Range("AB3:AB" & Range("A" & Rows.Count).End(xlUp).Row)
+    Range(Selection, Selection.End(xlDown)).Select
+    
+    'Number of Vehicles
+    Range("AE3").Select
+    Selection.Value = "=VLOOKUP(A3,'Northern Branch Phase II Debris'!A:M,8,FALSE)"
+    Selection.AutoFill Destination:=Range("AE3:AE" & Range("A" & Rows.Count).End(xlUp).Row)
+    Range(Selection, Selection.End(xlDown)).Select
+    
+    
+    'Number of Vehicles Removed
+    Range("AG3").Select
+    Selection.Value = "=VLOOKUP(A3,'Northern Branch Phase II Debris'!A:O,15,FALSE)"
+    Selection.AutoFill Destination:=Range("AG3:AG" & Range("A" & Rows.Count).End(xlUp).Row)
+    Range(Selection, Selection.End(xlDown)).Select
+    
+    '# of Trees
+    Range("AJ3").Select
+    Selection.Value = "=VLOOKUP(A3,'Northern Branch Phase II Debris'!A:N,10,FALSE)"
+    Selection.AutoFill Destination:=Range("AJ3:AJ" & Range("A" & Rows.Count).End(xlUp).Row)
+    Range(Selection, Selection.End(xlDown)).Select
+    
+    'Haz Trees ASSESSMENT
+    Range("AM3").Select
+    Selection.Value = "=VLOOKUP(A3,'Northern Branch Phase II Debris'!A:I,9,FALSE)"
+    Selection.AutoFill Destination:=Range("AM3:AM" & Range("A" & Rows.Count).End(xlUp).Row)
+    Range(Selection, Selection.End(xlDown)).Select
+    
+    
+    'County
+    Range("AO3").Select
+    Selection.Value = "=VLOOKUP(A3,'Northern Branch Phase II Debris'!A:C,2,FALSE)"
+    Selection.AutoFill Destination:=Range("AO3:AO" & Range("A" & Rows.Count).End(xlUp).Row)
+    Range(Selection, Selection.End(xlDown)).Select
+    
+    
+    'soil sample date from smart sheets
+    Range("AQ3").Select
+    Selection.Value = "=VLOOKUP(A3,'Northern Branch Phase II Debris'!A:P,16,FALSE)"
+    Selection.AutoFill Destination:=Range("AQ3:AQ" & Range("A" & Rows.Count).End(xlUp).Row)
+    Range(Selection, Selection.End(xlDown)).Select
+    
+    
+'FORMATING ASBESTOS REUKTS SHOW HOW GREEN FOR nd AND PINK FOR POS
+    Columns("J:J").Select
+    Selection.FormatConditions.Add Type:=xlCellValue, Operator:=xlEqual, _
+        Formula1:="=""POS"""
+    Selection.FormatConditions(Selection.FormatConditions.Count).SetFirstPriority
+    With Selection.FormatConditions(1).Font
+        .Color = -16383844
+    End With
+    With Selection.FormatConditions(1).Interior
+        .PatternColorIndex = xlAutomatic
+        .Color = 13551615
+    End With
+    
+    Selection.FormatConditions(1).StopIfTrue = False
+    Selection.FormatConditions.Add Type:=xlCellValue, Operator:=xlEqual, _
+        Formula1:="=""ND"""
+    Selection.FormatConditions(Selection.FormatConditions.Count).SetFirstPriority
+    With Selection.FormatConditions(1).Font
+        .Color = -16752384
+    End With
+    With Selection.FormatConditions(1).Interior
+        .Color = 13561798
+    End With
+    
+    Selection.FormatConditions(1).StopIfTrue = False
+    Columns("K:K").Select
+    Selection.FormatConditions.Add Type:=xlCellValue, Operator:=xlEqual, _
+        Formula1:="=""POSITIVE"""
+    Selection.FormatConditions(Selection.FormatConditions.Count).SetFirstPriority
+    With Selection.FormatConditions(1).Font
+        .Color = -16383844
+    End With
+    
+    With Selection.FormatConditions(1).Interior
+        .Color = 13551615
+    End With
+    
+    Selection.FormatConditions(1).StopIfTrue = False
+    Selection.FormatConditions.Add Type:=xlCellValue, Operator:=xlEqual, _
+        Formula1:="=""NEGATIVE"""
+    Selection.FormatConditions(Selection.FormatConditions.Count).SetFirstPriority
+    With Selection.FormatConditions(1).Font
+        .Color = -16752384
+
+    End With
+    With Selection.FormatConditions(1).Interior
+        .Color = 13561798
+    End With
+    Selection.FormatConditions(1).StopIfTrue = False
+    
+    Application.ScreenUpdating = True
+    
+    Range("A1").Select
+     
+End Sub
+
+ Sub Matching()
+'
+' Matching Macro
+'
+Application.ScreenUpdating = False
+
+'Matches asbestos date collect to smartsheets
+    Range("F3").Select
+    Selection.Value = "=D3=E3"
+    Selection.AutoFill Destination:=Range("F3:F" & Range("A" & Rows.Count).End(xlUp).Row)
+    Range(Selection, Selection.End(xlDown)).Select
+    
+ 'matches TT received dat to smartsheets
+     Range("I3").Select
+    Selection.Value = "=G3=H3"
+    Selection.AutoFill Destination:=Range("I3:I" & Range("A" & Rows.Count).End(xlUp).Row)
+    Range(Selection, Selection.End(xlDown)).Select
+    
+  'matches Chim Tip Dates to smartsheets
+    Range("U3").Select
+    Selection.Value = "=T3=S3"
+    Selection.AutoFill Destination:=Range("U3:U" & Range("A" & Rows.Count).End(xlUp).Row)
+    Range(Selection, Selection.End(xlDown)).Select
+
+'matches asbestos abatement complete date to smartsheets
+    Range("Y3").Select
+    Selection.Value = "=X3=W3"
+    Selection.AutoFill Destination:=Range("Y3:Y" & Range("A" & Rows.Count).End(xlUp).Row)
+    Range(Selection, Selection.End(xlDown)).Select
+    
+'matches SA date completed to smartsheets
+    Range("AC3").Select
+    Selection.Value = "=AB3=AA3"
+    Selection.AutoFill Destination:=Range("AC3:AC" & Range("A" & Rows.Count).End(xlUp).Row)
+    Range(Selection, Selection.End(xlDown)).Select
+
+'Matches Number of cars SA to smartsheets
+    Range("AF3").Select
+    Selection.Value = "=AE3=AD3"
+    Selection.AutoFill Destination:=Range("AF3:AF" & Range("A" & Rows.Count).End(xlUp).Row)
+    Range(Selection, Selection.End(xlDown)).Select
+
+'matches number of cars removed on smart sheets to SA and number of cars on smart sheets
+    Range("AH3").FormulaArray = "=AND(EXACT(AD3:AE3,AG3))"
+    Range("AH3").Select
+    Selection.AutoFill Destination:=Range("AH3:AH" & Range("A" & Rows.Count).End(xlUp).Row)
+    Range(Selection, Selection.End(xlDown)).Select
+
+'matches # of tree to smartsheets
+    Range("AK3").Select
+    Selection.Value = "=AJ3=AI3"
+    Selection.AutoFill Destination:=Range("AK3:AK" & Range("A" & Rows.Count).End(xlUp).Row)
+    Range(Selection, Selection.End(xlDown)).Select
+
+'MATCHES TREE SURVEY DATE to smartsheets
+    Range("AN3").Select
+    Selection.Value = "=AM3=AL3"
+    Selection.AutoFill Destination:=Range("AN3:AN" & Range("A" & Rows.Count).End(xlUp).Row)
+    Range(Selection, Selection.End(xlDown)).Select
+    
+'soil match dates
+    Range("AR3").Select
+    Selection.Value = "=AQ3=AP3"
+    Selection.AutoFill Destination:=Range("AR3:AR" & Range("A" & Rows.Count).End(xlUp).Row)
+    Range(Selection, Selection.End(xlDown)).Select
+    
+    Application.ScreenUpdating = True
+
+End Sub
+
+
+
+
+Sub Soil()
+
+Application.ScreenUpdating = False
+
+Sheets("Residential Confirmation").Select
+Rows("1:1").Select
+    Selection.Delete Shift:=xlUp
+
+Dim currentColumn As Integer
+Dim columnHeading As String
+
+For currentColumn = ActiveSheet.UsedRange.Columns.Count To 1 Step -1
+    columnHeading = ActiveSheet.UsedRange.Cells(1, currentColumn).Value
+
+'Check whether to preserve the column
+    Select Case columnHeading
+    'Insert name of columns to preserve
+        Case "APN", "Date Collected"
+            'Do nothing
+        Case Else
+            'Delete the column
+            ActiveSheet.Columns(currentColumn).Delete
+        End Select
+    Next
+    
+    Sheets("Audit").Select
+    Range("AP3").Select
+    Selection.Value = "=VLOOKUP(B3,'Residential Confirmation'!A:B,2,FALSE)"
+    Selection.AutoFill Destination:=Range("AP3:AP" & Range("B" & Rows.Count).End(xlUp).Row)
+    Range(Selection, Selection.End(xlDown)).Select
+    
+    Application.ScreenUpdating = True
+    
+End Sub
+
+
+
