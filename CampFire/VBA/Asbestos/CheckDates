@@ -1,52 +1,292 @@
-Public Sub RefreshDailyQC_Click()
-
-Dim DailyQC_File As String
-Dim DailyQC_LastMod As Date
-Dim SourceWB As Workbook
-Dim TargetWB As Workbook
-
+Sub RecentCompDates_Click()
 Call Initialize
-OriginalSheet = ActiveSheet.Name
-
-Do While "Never" <> "End"
-
-    Call GetLatestFile(DailyQCFolder, InitGlobal.DailyQCFileName, DailyQC_File, DailyQC_LastMod)
-
-    If DailyQC_File > "" And DailyQC_LastMod <> Worksheets("File Updates").Range("C6").Value Then
-        If TabExists(InitGlobal.AbateTab) Then DeleteTab (InitGlobal.AbateTab)
-        If TabExists(InitGlobal.TipsTab) Then DeleteTab (InitGlobal.TipsTab)
-        If TabExists(InitGlobal.SurveyTab) Then DeleteTab (InitGlobal.SurveyTab)
-        If TabExists(InitGlobal.XRefTab) Then DeleteTab (InitGlobal.XRefTab)
-        Worksheets("File Updates").Range("C4").Value = ""  'Wipe out file update date/time
-    
-        Application.ScreenUpdating = False
-        Set SourceWB = Workbooks.Open(DailyQC_File)
-        Set TargetWB = ThisWorkbook
-        SourceWB.Sheets(InitGlobal.AbateTab).Copy After:=TargetWB.Sheets(TargetWB.Sheets.Count)
-        SourceWB.Sheets(InitGlobal.TipsTab).Copy After:=TargetWB.Sheets(TargetWB.Sheets.Count)
-        SourceWB.Sheets(InitGlobal.SurveyTab).Copy After:=TargetWB.Sheets(TargetWB.Sheets.Count)
-        SourceWB.Sheets(InitGlobal.XRefTab).Copy After:=TargetWB.Sheets(TargetWB.Sheets.Count)
-        SourceWB.Close False
-        Sheets(InitGlobal.AbateTab).Rows(1).Delete
-        Sheets(InitGlobal.TipsTab).Rows(1).Delete
-        Sheets(InitGlobal.SurveyTab).Rows(1).Delete
-        Call Initialize 'Update global variables that hold column numbers in case they changed w/ this version of the sheet
-        Worksheets("File Updates").Range("C4").Value = DailyQC_LastMod
-        Exit Do
-    Else
-        If DailyQC_File > "" Then Exit Do
-        BoxType = vbRetryCancel + vbCritical
-        If MsgBox("No Daily QC file found to import", BoxType) = vbCancel Then Exit Do
-    End If
-Loop
-
-Sheets(InitGlobal.AbateTab).Visible = xlHidden
-Sheets(InitGlobal.TipsTab).Visible = xlHidden
-Sheets(InitGlobal.SurveyTab).Visible = xlHidden
-Sheets(InitGlobal.XRefTab).Visible = xlHidden
-Sheets(OriginalSheet).Activate
-Application.ScreenUpdating = True
+Call CheckDates("Recent")
 
 End Sub
 
+Sub AllCompDate_Click()
+Call Initialize
+Call CheckDates("All")
+
+End Sub
+
+
+Sub CheckDates(Mode)
+
+Dim Complete As Boolean
+
+'Set up, remove old data & any highlighting
+OriginalSheet = ActiveSheet.Name
+'Application.ScreenUpdating = False
+Sheets("Dashboard to BFI").Activate
+InitGlobal.MassUpdate = True
+ActiveSheet.AutoFilterMode = False
+LastRow = ActiveSheet.Range("A1048576").End(xlUp).Row
+If Range("A3") > "" Then
+    With ActiveSheet.Range("A3:S" & LastRow)
+        .ClearContents
+        .Interior.Color = xlNone
+        .Borders.LineStyle = xlNone
+        .Font.Bold = False
+    End With
+End If
+
+Select Case Mode
+
+Case Is = "Recent"
+
+    'Calculate the range of the previous 2 work days, skipping Sundays
+    Today = Sheets("Dashboard to BFI").Range("B1").Value
+    Select Case Weekday(Today)
+    Case Is < 3 'Sun-Mon
+        TwoDaysAgo = DateAdd("d", -4, Today)
+    Case Is = 3 'Tue
+        TwoDaysAgo = DateAdd("d", -3, Today)
+    Case Is > 3 'Wed-Sat
+        TwoDaysAgo = DateAdd("d", -1, Today)
+    End Select
+    
+'Copy in APN list from BFI where any date matches selection
+    APNRow = 3
+    For Each Cell In Sheets(InitGlobal.BFITab).Range(Sheets(InitGlobal.BFITab).Cells(2, BFI_APN), Sheets(InitGlobal.BFITab).Cells(BFI_LastRow, BFI_APN))
+        BFICollectDate = Sheets(InitGlobal.BFITab).Range(Sheets(InitGlobal.BFITab).Cells(Cell.Row, BFI_CollectDate), Sheets(InitGlobal.BFITab).Cells(Cell.Row, BFI_CollectDate)).Value
+        BFITipDate = Sheets(InitGlobal.BFITab).Range(Sheets(InitGlobal.BFITab).Cells(Cell.Row, BFI_TipDate), Sheets(InitGlobal.BFITab).Cells(Cell.Row, BFI_TipDate)).Value
+        BFIAbateDate = Sheets(InitGlobal.BFITab).Range(Sheets(InitGlobal.BFITab).Cells(Cell.Row, BFI_AbateDate), Sheets(InitGlobal.BFITab).Cells(Cell.Row, BFI_AbateDate)).Value
+        BFIChimneyAbateDate = Sheets(InitGlobal.BFITab).Range(Sheets(InitGlobal.BFITab).Cells(Cell.Row, BFI_ChimneyAbateDate), Sheets(InitGlobal.BFITab).Cells(Cell.Row, BFI_ChimneyAbateDate)).Value
+        BFIResultDate = Sheets(InitGlobal.BFITab).Range(Sheets(InitGlobal.BFITab).Cells(Cell.Row, BFI_ResultDate), Sheets(InitGlobal.BFITab).Cells(Cell.Row, BFI_ResultDate)).Value
+
+        If BFICollectDate >= TwoDaysAgo And BFICollectDate <= Today Or _
+           BFITipDate >= TwoDaysAgo And BFITipDate <= Today Or _
+           BFIAbateDate >= TwoDaysAgo And BFIAbateDate <= Today Or _
+           BFIChimneyAbateDate >= TwoDaysAgo And BFIChimneyAbateDate <= Today Or _
+           BFIResultDate >= TwoDaysAgo And BFIResultDate <= Today Then
+                ActiveSheet.Range(Cells(APNRow, 1), Cells(APNRow, 1)).Value = Cell.Value
+                APNRow = APNRow + 1
+        End If
+    Next Cell
+    
+'Copy in APN list from Dashboard where any date matches selection
+    For Each Cell In Sheets(InitGlobal.DBTab).Range(Sheets(InitGlobal.DBTab).Cells(2, DB_APN), Sheets(InitGlobal.DBTab).Cells(BFI_LastRow, DB_APN))
+        DBSurveyDate = Sheets(InitGlobal.DBTab).Range(Sheets(InitGlobal.DBTab).Cells(Cell.Row, DB_SurveyDate), Sheets(InitGlobal.DBTab).Cells(Cell.Row, DB_SurveyDate)).Value
+        DBTipDate = Sheets(InitGlobal.DBTab).Range(Sheets(InitGlobal.DBTab).Cells(Cell.Row, DB_TipDate), Sheets(InitGlobal.DBTab).Cells(Cell.Row, DB_TipDate)).Value
+        DBAbateDate = Sheets(InitGlobal.DBTab).Range(Sheets(InitGlobal.DBTab).Cells(Cell.Row, DB_AbateDate), Sheets(InitGlobal.DBTab).Cells(Cell.Row, DB_AbateDate)).Value
+        DBAsbCompDate = Sheets(InitGlobal.DBTab).Range(Sheets(InitGlobal.DBTab).Cells(Cell.Row, DB_AsbCompDate), Sheets(InitGlobal.DBTab).Cells(Cell.Row, DB_AsbCompDate)).Value
+        DBAsbTestDate = Sheets(InitGlobal.DBTab).Range(Sheets(InitGlobal.DBTab).Cells(Cell.Row, DB_AsbTestDate), Sheets(InitGlobal.DBTab).Cells(Cell.Row, DB_AsbTestDate)).Value
+
+        If DBSurveyDate >= TwoDaysAgo And DBSurveyDate <= Today Or _
+            DBTipDate >= TwoDaysAgo And DBTipDate <= Today Or _
+            DBAbateDate >= TwoDaysAgo And DBAbateDate <= Today Or _
+            DBAsbCompDate >= TwoDaysAgo And DBAsbCompDate <= Today Or _
+            DBAsbTestDate >= TwoDaysAgo And DBAsbTestDate <= Today Then
+            If Right(Cell.Value, 3) = "-00" Then
+                ActiveSheet.Range(Cells(APNRow, 1), Cells(APNRow, 1)).Value = Left(Cell.Value, Len(Cell.Value) - 3)
+                Cell.Value = ActiveSheet.Range(Cells(APNRow, 1), Cells(APNRow, 1)).Value
+            Else
+                ActiveSheet.Range(Cells(APNRow, 1), Cells(APNRow, 1)).Value = Cell.Value
+            End If
+            APNRow = APNRow + 1
+        End If
+    Next Cell
+    
+Case Is = "All"
+    'Copy in APN list from BFI
+    Sheets(InitGlobal.BFITab).Range(Sheets(InitGlobal.BFITab).Cells(2, InitGlobal.BFI_APN), Sheets(InitGlobal.BFITab).Cells(InitGlobal.BFI_LastRow, InitGlobal.BFI_APN)).Copy
+    Worksheets("Dashboard to BFI").Range("A3").PasteSpecial Paste:=xlPasteValues
+              
+    'Copy in APN list from Dashboard
+    Sheets(InitGlobal.DBTab).Range(Sheets(InitGlobal.DBTab).Cells(2, InitGlobal.DB_APN), Sheets(InitGlobal.DBTab).Cells(InitGlobal.DB_LastRow, InitGlobal.DB_APN)).Copy
+
+    'Worksheets(InitGlobal.DBTab).Range("B2:B" & Worksheets(InitGlobal.DBTab).Range("A1048576").End(xlUp).Row).Copy
+    Worksheets("Dashboard to BFI").Range("A" & Worksheets("Dashboard to BFI").Range("A1048576").End(xlUp).Row + 1).PasteSpecial Paste:=xlPasteValues
+
+    Application.CutCopyMode = False
+        
+End Select
+
+'Remove duplicate APNs, then sort
+ActiveSheet.Range("A2:A" & ActiveSheet.Range("A1048576").End(xlUp).Row).RemoveDuplicates Columns:=Array(1), Header:=xlYes
+ActiveSheet.Columns("A").Cells.HorizontalAlignment = xlHAlignCenter
+ActiveSheet.Range("A1").Cells.HorizontalAlignment = xlHAlignRight
+LastRow = ActiveSheet.Range("A1048576").End(xlUp).Row
+Range("A2:A" & ActiveSheet.Range("A1048576").End(xlUp).Row).Sort Key1:=Range("A2"), Order1:=xlAscending, Header:=xlYes
+ActiveSheet.Range("B1").Select
+
+'Get fields necessary to evaluate asbestos complete date & add to sheet
+IncludeWarnings = ActiveSheet.Range("D1").Value
+For Each Cell In Range("A3:A" & ActiveSheet.Range("A1048576").End(xlUp).Row)
+
+    ErrorText = ""
+    APN = Cell.Value
+    SurveyDate = DashDate(Application.VLookup(APN, Sheets(InitGlobal.DBTab).Range(Sheets(DBTab).Cells(2, DB_APN), Sheets(DBTab).Cells(DB_LastRow, DB_LastCol)), DB_SurveyDate - DB_APN + 1, False))
+    AsbestosCompDate = DashDate(Application.VLookup(APN, Sheets(InitGlobal.DBTab).Range(Sheets(DBTab).Cells(2, DB_APN), Sheets(DBTab).Cells(DB_LastRow, DB_LastCol)), DB_AsbCompDate - DB_APN + 1, False))
+    AsbestosTestDate = DashDate(Application.VLookup(APN, Sheets(InitGlobal.DBTab).Range(Sheets(DBTab).Cells(2, DB_APN), Sheets(DBTab).Cells(DB_LastRow, DB_LastCol)), DB_AsbTestDate - DB_APN + 1, False))
+    AsbestosTestResult = Application.VLookup(APN, Sheets(InitGlobal.DBTab).Range(Sheets(DBTab).Cells(2, DB_APN), Sheets(DBTab).Cells(DB_LastRow, DB_LastCol)), DB_TestResults - DB_APN + 1, False)
+    AbateDate = DashDate(Application.VLookup(APN, Sheets(InitGlobal.DBTab).Range(Sheets(DBTab).Cells(2, DB_APN), Sheets(DBTab).Cells(DB_LastRow, DB_LastCol)), DB_AbateDate - DB_APN + 1, False))
+    ChimneyYN = Application.VLookup(APN, Sheets(InitGlobal.DBTab).Range(Sheets(DBTab).Cells(2, DB_APN), Sheets(DBTab).Cells(DB_LastRow, DB_LastCol)), DB_ChimneyYN - DB_APN + 1, False)
+    ChimneyTestResult = Application.VLookup(APN, Sheets(InitGlobal.DBTab).Range(Sheets(DBTab).Cells(2, DB_APN), Sheets(DBTab).Cells(DB_LastRow, DB_LastCol)), DB_ChimneyResults - DB_APN + 1, False)
+    ChimAbateDate = Application.VLookup(APN, Sheets(InitGlobal.BFITab).Range(Sheets(BFITab).Cells(2, BFI_APN), Sheets(BFITab).Cells(BFI_LastRow, BFI_LastCol)), BFI_ChimneyAbateDate - BFI_APN + 1, False)
+    SampleCount = Application.VLookup(APN, Sheets(InitGlobal.BFITab).Range(Sheets(BFITab).Cells(2, BFI_APN), Sheets(BFITab).Cells(BFI_LastRow, BFI_LastCol)), BFI_SampleCount - BFI_APN + 1, False)
+    ChimTipDate = DashDate(Application.VLookup(APN, Sheets(InitGlobal.DBTab).Range(Sheets(DBTab).Cells(2, DB_APN), Sheets(DBTab).Cells(DB_LastRow, DB_LastCol)), DB_TipDate - DB_APN + 1, False))
+    APNComment = Application.VLookup(APN, Sheets("Comment Retention").Range("A3:B" & Sheets("Comment Retention").Range("A1048576").End(xlUp).Row), 2, False)
+    SurveyResult = Application.VLookup(APN, Sheets(InitGlobal.DBTab).Range(Sheets(DBTab).Cells(2, DB_APN), Sheets(DBTab).Cells(DB_LastRow, DB_LastCol)), DB_AsbSurveyResults - DB_APN + 1, False)
+    WithdrawalDate = DashDate(Application.VLookup(APN, Sheets(InitGlobal.DBTab).Range(Sheets(DBTab).Cells(2, DB_APN), Sheets(DBTab).Cells(DB_LastRow, DB_LastCol)), DB_WithdrawalDate - DB_APN + 1, False))
+    BFIResults = Application.VLookup(APN, Sheets(InitGlobal.BFITab).Range(Sheets(BFITab).Cells(2, BFI_APN), Sheets(BFITab).Cells(BFI_LastRow, BFI_LastCol)), BFI_FinalResult - BFI_APN + 1, False)
+    BFIChimneyYN = Application.VLookup(APN, Sheets(InitGlobal.BFITab).Range(Sheets(BFITab).Cells(2, BFI_APN), Sheets(BFITab).Cells(BFI_LastRow, BFI_LastCol)), BFI_ChimneyYN - BFI_APN + 1, False)
+    BFITipDate = Application.VLookup(APN, Sheets(InitGlobal.BFITab).Range(Sheets(BFITab).Cells(2, BFI_APN), Sheets(BFITab).Cells(BFI_LastRow, BFI_LastCol)), BFI_TipDate - BFI_APN + 1, False)
+    BFIChimResult = Application.VLookup(APN, Sheets(InitGlobal.BFITab).Range(Sheets(BFITab).Cells(2, BFI_APN), Sheets(BFITab).Cells(BFI_LastRow, BFI_LastCol)), BFI_ChimneyResults - BFI_APN + 1, False)
+           
+    If IncludeWarnings = "N" And (IsError(AsbestosCompDate) Or IsError(ChimAbateDate)) Then GoTo NextCell
+           
+    If Not IsError(AsbestosCompDate) And IsError(ChimAbateDate) Then
+        ChimAbateDate = 0
+        Cell.Offset(, 1) = "Record in Dashboard not found in Asbestos Tracker (BFI)"
+        Cell.Interior.Color = RGB(255, 0, 0)
+    End If
+        
+    If Not IsError(APNComment) Then
+        Cell.Offset(, 2) = APNComment
+    End If
+    
+    If IsError(SampleCount) Then SampleCount = 0
+    If IsError(WithdrawalDate) Then WithdrawalDate = 0
+    If IsError(BFIResults) Then BFIResults = ""
+    If IsError(BFIChimneyYN) Then BFIChimneyYN = ""
+    If IsError(BFITipDate) Then BFITipDate = 0
+    If IsError(BFIChimResult) Then BFIChimResult = ""
+        
+    If IsError(AsbestosCompDate) Then
+        Cell.Offset(, 1) = "Record in Asbestos Tracker (BFI) not found in Dashboard"
+        Cell.Interior.Color = RGB(255, 0, 0)
+        AsbestosCompDate = 0
+        AsbestosTestDate = 0
+        AsbestosTestResult = ""
+        AbateDate = 0
+        SurveyResult = ""
+        ChimneyYN = ""
+        ChimneyTestResult = ""
+        ChimAbateDate = 0
+        ChimTipDate = 0
+        SurveyDate = 0
+    End If
+            
+    If WithdrawalDate > 0 Then Cell.Offset(, 3) = "Withdrawn"
+    Cell.Offset(, 4) = SurveyDate
+    Cell.Offset(, 5) = SurveyResult
+    Cell.Offset(, 6) = SampleCount
+    Cell.Offset(, 7) = AsbestosTestDate
+    Cell.Offset(, 8) = AsbestosTestResult
+    Cell.Offset(, 9) = BFIResults
+    Cell.Offset(, 10) = AbateDate
+    Cell.Offset(, 11) = ChimneyYN
+    Cell.Offset(, 12) = BFIChimneyYN
+    Cell.Offset(, 13) = ChimTipDate
+    Cell.Offset(, 14) = BFITipDate
+    Cell.Offset(, 15) = ChimneyTestResult
+    Cell.Offset(, 16) = BFIChimResult
+    Cell.Offset(, 17) = ChimAbateDate
+    Cell.Offset(, 18) = AsbestosCompDate
+        
+    Complete = False
+    If SurveyResult = "Clear" And _
+        (ChimneyYN = "No" Or _
+         ChimneyYN = "Yes" And ChimTipDate > 40000 And (ChimneyTestResult = "Negative for Asbestos" Or ChimneyTestResult = "Positive for Asbestos" And ChimAbateDate > 40000)) _
+    Or _
+        AsbestosTestResult = "Clear" And _
+         (ChimneyYN = "No" Or _
+          ChimneyYN = "Yes" And ChimTipDate > 40000 And (ChimneyTestResult = "Negative for Asbestos" Or ChimneyTestResult = "Positive for Asbestos" And ChimAbateDate > 40000)) _
+    Or _
+       AsbestosTestResult = "Asbestos Confirmed" And AbateDate > 40000 And _
+         (ChimneyYN = "No" Or _
+          ChimneyYN = "Yes" And ChimTipDate > 40000 And ChimneyTestResult = "Negative for Asbestos" Or ChimneyTestResult = "Positive for Asbestos" And ChimAbateDate > 40000) _
+    Then _
+        Complete = True
+     
+    'Dashboad results <> BFI results
+    If Trim(AsbestosTestResult) = "Asbestos Confirmed" And Trim(BFIResults) <> "POS" Or _
+       Trim(AsbestosTestResult) = "Clear" And Trim(BFIResults) <> "ND" Or _
+       Trim(AsbestosTestResult) = "" And Trim(BFIResults) <> "" Then
+        Call AddError(ErrorText, "Dashboard Results <> BFI Final Results")
+        Cell.Offset(, 8).Interior.Color = RGB(255, 255, 153)
+        Cell.Offset(, 9).Interior.Color = RGB(255, 255, 153)
+    End If
+    
+    'Dashboard Chimney Y/N <> BFI Chimney Y/N
+    If Trim(ChimneyYN) = "Yes" And (Trim(BFIChimneyYN) <> "Y" And Not WorksheetFunction.IsNumber(BFIChimneyYN)) Or _
+       Trim(ChimneyYN) = "No" And Trim(BFIChimneyYN) <> "N" Or _
+       Trim(ChimneyYN) = "" And Trim(BFIChimneyYN) <> "" Then
+        Call AddError(ErrorText, "Dashboard Chimney Y/N <> BFI Chimney Y/N")
+        Cell.Offset(, 11).Interior.Color = RGB(255, 255, 153)
+        Cell.Offset(, 12).Interior.Color = RGB(255, 255, 153)
+    End If
+    
+    'Dashboard Chimney Tip Date <> BFI Chimney Tip Date
+    If Int(ChimTipDate) <> BFITipDate Then
+        Call AddError(ErrorText, "Dashboard Chimney Tip Date <> BFI Chimney Tip Date")
+        Cell.Offset(, 13).Interior.Color = RGB(255, 255, 153)
+        Cell.Offset(, 14).Interior.Color = RGB(255, 255, 153)
+    End If
+    
+    'Dashboard Chimney Results <> BFI Chimney Results
+    If ChimneyTestResult = "Positive for Asbestos" And BFIChimResult <> "POS" Or _
+       ChimneyTestResult = "Negative for Asbestos" And BFIChimResult <> "ND" Or _
+       ChimneyTestResult = "" And BFIChimResult <> "" Then
+       Call AddError(ErrorText, "Dashboard Chimney Results <> BFI Chimney Results")
+       Cell.Offset(, 15).Interior.Color = RGB(255, 255, 153)
+       Cell.Offset(, 16).Interior.Color = RGB(255, 255, 153)
+    End If
+        
+    'Asbestos complete date is blank & should be populated
+    If AsbestosCompDate < 40000 And Complete = True Then
+        Call AddError(ErrorText, "Record should have an Asbestos Complete Date but doesn't")
+        Cell.Offset(, 18).Interior.Color = RGB(255, 255, 153)
+    End If
+           
+    'Asbestos complete date populated but should be blank
+    If AsbestosCompDate > 0 And Complete = False Then
+        Call AddError(ErrorText, "Record has an Asbestos Complete Date but should not")
+        Cell.Offset(, 18).Interior.Color = RGB(255, 255, 153)
+    End If
+    
+    'Inital survey said was clear but samples were taken
+    If Not IsError(SurveyResult) Then
+        If SurveyResult = "Clear" And SampleCount > 0 Then
+            Call AddError(ErrorText, "Dashboard survey result ""Clear"" but samples were taken")
+            Cell.Offset(, 5).Interior.Color = RGB(255, 255, 153)
+            Cell.Offset(, 6).Interior.Color = RGB(255, 255, 153)
+        End If
+    End If
+    
+   If ErrorText > "" Then Cell.Offset(, 1) = ErrorText
+   
+NextCell:
+Next Cell
+
+
+'Put borders around used cells
+LastRow = ActiveSheet.Range("A1048576").End(xlUp).Row
+ActiveSheet.Range("A3:S" & LastRow).Borders.LineStyle = xlContinuous
+
+'Put heavier borders around Dashboard/BFI field pairs
+ActiveSheet.Range("I2:J" & LastRow).BorderAround Weight:=xlMedium
+ActiveSheet.Range("L2:M" & LastRow).BorderAround Weight:=xlMedium
+ActiveSheet.Range("P2:Q" & LastRow).BorderAround Weight:=xlMedium
+
+
+'Set filter to only show records that have issues
+LastRow = ActiveSheet.Range("A1048576").End(xlUp).Row
+ActiveSheet.Range("$A2:$O" & LastRow).AutoFilter field:=2, Criteria1:=">"""""
+
+ActiveSheet.Calculate
+Application.ScreenUpdating = True
+InitGlobal.MassUpdate = False
+Sheets(OriginalSheet).Activate
+
+End Sub
+
+Sub AddError(CurrentText, NewError)
+
+If CurrentText > "" Then CurrentText = CurrentText & vbNewLine
+CurrentText = CurrentText & NewError
+
+End Sub
 
