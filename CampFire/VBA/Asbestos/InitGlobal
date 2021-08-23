@@ -1,0 +1,291 @@
+Public MassUpdate As Boolean
+Public BFIFolder As String
+Public DashFolder As String
+Public OnSiteFolder As String
+Public DailyQCFolder As String
+Public RTRFolder As String
+Public iFrmSurveyFolder As String
+Public iFrmChimFolder As String
+Public iFrmAbateFolder As String
+
+'Define names for spreadsheet tabs
+Public BFIFileName As String
+Public BFITab As String
+
+Public DBFileName As String
+Public DBTab As String
+
+Public DailyQCFileName As String
+Public AbateTab As String
+Public TipsTab As String
+Public SurveyTab As String
+Public XRefTab As String
+
+Public OnSiteFileName As String
+Public OnSiteTab As String
+
+Public RTRFileName As String
+Public RTRTab As String
+
+Public iFChimFileName As String
+Public iFChimTab As String
+
+Public iFAbateFileName As String
+Public iFAbateTab As String
+
+Public iFSurveyFileName As String
+Public iFSurveyTab As String
+
+'Define names for spreadsheet column indexes
+Public DB_APN As Integer
+Public DB_MHPAPN As Integer
+Public DB_GlobalID As Integer
+Public DB_TestResults As Integer
+Public DB_SurveyDate As Integer
+Public DB_TipDate As Integer
+Public DB_AbateDate As Integer
+Public DB_SADate As Integer
+Public DB_ChimneyYN As Integer
+Public DB_AsbCompDate As Integer
+Public DB_ChimneyResults As Integer
+Public DB_AsbTestDate As Integer
+Public DB_AsbSurveyResults As Integer
+Public DB_WithdrawalDate As Integer
+Public DB_Address As Integer
+Public DB_LastCol As Long
+Public DB_LastRow As Long
+
+Public BFI_APN As Integer
+Public BFI_AsbSurveyDate As Integer
+Public BFI_CollectDate As Integer
+Public BFI_FinalResult As Integer
+Public BFI_TipDate As Integer
+Public BFI_AbateDate As Integer
+Public BFI_ChimneyAbateDate As Integer
+Public BFI_ResultDate As Integer
+Public BFI_SampleCount As Integer
+Public BFI_AddressNbr As Integer
+Public BFI_Street As Integer
+Public BFI_ChimneyYN As Integer
+Public BFI_ChimneyResults As Integer
+Public BFI_LastCol As Long
+Public BFI_LastRow As Long
+
+Public Abate_APN As Integer
+Public Abate_Date As Integer
+Public Abate_Team As Integer
+Public Abate_LastCol As Long
+Public Abate_LastRow As Long
+
+Public Tip_APN As Integer
+Public Tip_Date As Integer
+Public Tip_Team As Integer
+Public Tip_LastCol As Long
+Public Tip_LastRow As Long
+
+Public XRef_APN As Integer
+Public XRef_GlobalID As Integer
+Public XRef_LastCol As Long
+Public XRef_LastRow As Long
+
+Public Survey_APN As Integer
+Public Survey_Date As Integer
+Public Survey_LastCol As Long
+Public Survey_LastRow As Long
+
+Public OnSite_APN As Integer
+Public OnSite_Date As Integer
+Public OnSite_Complete As Integer
+Public OnSite_QC As Integer
+Public OnSite_LastCol As Long
+Public OnSite_LastRow As Long
+
+Public RTR_APN As Integer
+Public RTR_SvcCode As Integer
+Public RTR_Date As Integer
+Public RTR_Ticket As Integer
+Public RTR_Latitude As Integer
+Public RTR_Longitude As Integer
+
+Public RTR_LastCol As Long
+Public RTR_LastRow As Long
+
+Public iFChim_APN As Integer
+Public iFChim_Date As Integer
+Public iFChim_LastCol As Long
+Public iFChim_LastRow As Long
+
+Public iFAbate_APN As Integer
+Public iFAbate_Date As Integer
+Public iFAbate_Team As Integer
+Public iFAbate_LastCol As Long
+Public iFAbate_LastRow As Long
+
+Public iFSurvey_APN As Integer
+Public iFSurvey_Date As Integer
+Public iFSurvey_LastCol As Long
+Public iFSurvey_LastRow As Long
+
+
+
+Public Sub Initialize()
+
+'Static values for file & sheet names, changing them here corrects entire workbook
+InitGlobal.BFIFileName = "Asbestos-CAMP Fire*"
+InitGlobal.BFITab = "Asbestos"
+
+InitGlobal.DBFileName = "Camp_Fire_Parcels*"
+InitGlobal.DBTab = "Debris Removal (Parcel Mast_0"
+
+InitGlobal.DailyQCFileName = "Dashboard_Google TrackerQC*"
+InitGlobal.AbateTab = "Abatements"
+InitGlobal.TipsTab = "Chimney Tips"
+InitGlobal.SurveyTab = "Survey"
+InitGlobal.XRefTab = "BFIDashboard Xref"
+
+InitGlobal.OnSiteFileName = "Asbestos_On-Site_QC_Tracker*"
+InitGlobal.OnSiteTab = "On-Site QC"
+
+InitGlobal.RTRFileName = "aUnitRateTicket*"
+InitGlobal.RTRTab = "aUnitRateTicket"
+
+InitGlobal.iFChimFileName = "cf_chimney_tip_insp_p*"
+InitGlobal.iFChimTab = "cf_chimney_tip_insp_p"
+
+InitGlobal.iFAbateFileName = "cf_asb_clear_p*"
+InitGlobal.iFAbateTab = "cf_asb_clear_p"
+
+InitGlobal.iFSurveyFileName = "camp_fire_sacm_fs_p*"
+InitGlobal.iFSurveyTab = "camp_fire_sacm_fs_p"
+
+
+'Dashboard column locations
+If TabExists(InitGlobal.DBTab) Then
+    DB_APN = HeadingColumn("APN", InitGlobal.DBTab, 1, True)
+    DB_MHPAPN = HeadingColumn("MHP APN", InitGlobal.DBTab, 1, False)
+    DB_GlobalID = HeadingColumn("GlobalID", InitGlobal.DBTab, 1, False)
+    DB_TestResults = HeadingColumn("Asbestos Test Results", InitGlobal.DBTab, 1, True)
+    DB_SurveyDate = HeadingColumn("Asbestos Survey Date", InitGlobal.DBTab, 1, True)
+    DB_TipDate = HeadingColumn("Chimney Tipped Date", InitGlobal.DBTab, 1, True)
+    DB_AbateDate = HeadingColumn("Asbestos Abatement Date", InitGlobal.DBTab, 1, True)
+    DB_SADate = HeadingColumn("Site Assessment Completed Date", InitGlobal.DBTab, 1, True)
+    DB_ChimneyYN = HeadingColumn("Is there a Chimney?", InitGlobal.DBTab, 1, True)
+    DB_AsbCompDate = HeadingColumn("Asbestos Completed Date", InitGlobal.DBTab, 1, True)
+    DB_ChimneyResults = HeadingColumn("Chimney Verified", InitGlobal.DBTab, 1, True)
+    DB_AsbTestDate = HeadingColumn("Asbestos Test Date", InitGlobal.DBTab, 1, True)
+    DB_AsbSurveyDate = HeadingColumn("Asbestos Survey Date", InitGlobal.DBTab, 1, True)
+    DB_AsbSurveyResults = HeadingColumn("Asbestos Survey Results", InitGlobal.DBTab, 1, True)
+    DB_WithdrawalDate = HeadingColumn("Withdrawal Date", InitGlobal.DBTab, 1, True)
+    DB_Address = HeadingColumn("Address", InitGlobal.DBTab, 1, True)
+    DB_LastCol = Worksheets(InitGlobal.DBTab).Range("A1").End(xlToRight).Column
+    DB_LastRow = Worksheets(InitGlobal.DBTab).Range("A1048576").End(xlUp).Row
+End If
+
+'BFI column locations & table length/width
+If TabExists(InitGlobal.BFITab) Then
+    BFI_APN = HeadingColumn("APN", InitGlobal.BFITab, 1, True)
+    BFI_CollectDate = HeadingColumn("Date Collected", InitGlobal.BFITab, 1, True)
+    BFI_FinalResult = HeadingColumn("Final Results", InitGlobal.BFITab, 1, True)
+    BFI_TipDate = HeadingColumn("CHIM TIP (DATE)", InitGlobal.BFITab, 1, True)
+    BFI_AbateDate = HeadingColumn("Asbestos Abatement Completed Date", InitGlobal.BFITab, 1, True)
+    BFI_ChimneyAbateDate = HeadingColumn("Chimney Abatement Completed Date", InitGlobal.BFITab, 1, True)
+    BFI_ResultDate = HeadingColumn("Tt Received Date", InitGlobal.BFITab, 1, True)
+    BFI_SampleCount = HeadingColumn("No. of Samples", InitGlobal.BFITab, 1, True)
+    BFI_AddressNbr = HeadingColumn("No.", InitGlobal.BFITab, 1, True)
+    BFI_Street = HeadingColumn("ST", InitGlobal.BFITab, 1, True)
+    BFI_ChimneyYN = HeadingColumn("Chimney", InitGlobal.BFITab, 1, True)
+    BFI_ChimneyResults = HeadingColumn("Chimney Finding", InitGlobal.BFITab, 1, True)
+    BFI_LastCol = Worksheets(InitGlobal.BFITab).Range("A1").End(xlToRight).Column
+    BFI_LastRow = Worksheets(InitGlobal.BFITab).Range("A1048576").End(xlUp).Row
+End If
+
+'Daily QC Abatement column locations & table length/width
+If TabExists(InitGlobal.AbateTab) Then
+    Abate_APN = HeadingColumn("APN", InitGlobal.AbateTab, 1, True)
+    Abate_Date = HeadingColumn("Abate Date", InitGlobal.AbateTab, 1, True)
+    Abate_Team = HeadingColumn("Team", InitGlobal.AbateTab, 1, True)
+    Abate_LastCol = Worksheets(InitGlobal.AbateTab).Range("A1").End(xlToRight).Column
+    Abate_LastRow = Worksheets(InitGlobal.AbateTab).Range("A1048576").End(xlUp).Row
+End If
+
+'Daily QC Chimney Tip column locations & table length/width
+If TabExists(InitGlobal.TipsTab) Then
+    Tip_APN = HeadingColumn("APN", InitGlobal.TipsTab, 1, True)
+    Tip_Date = HeadingColumn("Tip Date", InitGlobal.TipsTab, 1, True)
+    Tip_Team = HeadingColumn("Team", InitGlobal.TipsTab, 1, True)
+    Tip_LastCol = Worksheets(InitGlobal.AbateTab).Range("A1").End(xlToRight).Column
+    Tip_LastRow = Worksheets(InitGlobal.AbateTab).Range("A1048576").End(xlUp).Row
+End If
+
+'Daily QC Survey column locations & table length/width
+If TabExists(InitGlobal.SurveyTab) Then
+    Survey_APN = HeadingColumn("APN", InitGlobal.SurveyTab, 1, True)
+    Survey_Date = HeadingColumn("Date", InitGlobal.SurveyTab, 1, True)
+    Survey_LastCol = Worksheets(InitGlobal.SurveyTab).Range("A1").End(xlToRight).Column
+    Survey_LastRow = Worksheets(InitGlobal.SurveyTab).Range("A1048576").End(xlUp).Row
+End If
+
+'BFI/Dashboard XRef column locations
+If TabExists(InitGlobal.XRefTab) Then
+    XRef_APN = HeadingColumn("BFI APN", InitGlobal.XRefTab, 1, True)
+    XRef_GlobalID = HeadingColumn("Dashboard Global ID", InitGlobal.XRefTab, 1, True)
+    XRef_LastCol = Worksheets(InitGlobal.XRefTab).Range("A1").End(xlToRight).Column
+    XRef_LastRow = Worksheets(InitGlobal.XRefTab).Range("A1048576").End(xlUp).Row
+End If
+
+'On-Site QC column locations & table length/width
+If TabExists(InitGlobal.OnSiteTab) Then
+    OnSite_APN = HeadingColumn("APN", InitGlobal.OnSiteTab, 1, True)
+    OnSite_Date = HeadingColumn("QC Date", InitGlobal.OnSiteTab, 1, True)
+    OnSite_Complete = HeadingColumn("QC Complete", InitGlobal.OnSiteTab, 1, True)
+    OnSite_QC = HeadingColumn("QC Personnel", InitGlobal.OnSiteTab, 1, True)
+    OnSite_LastCol = Worksheets(InitGlobal.OnSiteTab).Range("A1").End(xlToRight).Column
+    OnSite_LastRow = Worksheets(InitGlobal.OnSiteTab).Range("A1048576").End(xlUp).Row
+End If
+
+'RecoveryTrac (RTR) column locations & table length/width
+If TabExists(InitGlobal.RTRTab) Then
+    RTR_APN = HeadingColumn("textbox8", InitGlobal.RTRTab, 1, True)
+    RTR_SvcCode = HeadingColumn("textbox41", InitGlobal.RTRTab, 1, True)
+    RTR_Date = HeadingColumn("textbox18", InitGlobal.RTRTab, 1, True)
+    RTR_Ticket = HeadingColumn("textbox17", InitGlobal.RTRTab, 1, True)
+    RTR_Latitude = HeadingColumn("textbox28", InitGlobal.RTRTab, 1, True)
+    RTR_Longitude = HeadingColumn("textbox33", InitGlobal.RTRTab, 1, True)
+    RTR_LastCol = Worksheets(InitGlobal.RTRTab).Range("A1").End(xlToRight).Column
+    RTR_LastRow = Worksheets(InitGlobal.RTRTab).Range("A1048576").End(xlUp).Row
+End If
+
+'iForm Chimney column locations & table length/width
+If TabExists(InitGlobal.iFChimTab) Then
+    iFChim_APN = HeadingColumn("apn", InitGlobal.iFChimTab, 1, True)
+    iFChim_Date = HeadingColumn("inspection_date", InitGlobal.iFChimTab, 1, True)
+    iFChim_Team = HeadingColumn("inspector", InitGlobal.iFChimTab, 1, True)
+    iFChim_LastCol = Worksheets(InitGlobal.iFChimTab).Range("A1").End(xlToRight).Column
+    iFChim_LastRow = Worksheets(InitGlobal.iFChimTab).Range("A1048576").End(xlUp).Row
+End If
+
+'iForm Abatement column locations & table length/width
+If TabExists(InitGlobal.iFAbateTab) Then
+    iFAbate_APN = HeadingColumn("apn", InitGlobal.iFAbateTab, 1, True)
+    iFAbate_Date = HeadingColumn("abatement_end", InitGlobal.iFAbateTab, 1, True)
+    iFAbate_Team = HeadingColumn("inspector_name", InitGlobal.iFAbateTab, 1, True)
+    iFAbate_LastCol = Worksheets(InitGlobal.iFAbateTab).Range("A1").End(xlToRight).Column
+    iFAbate_LastRow = Worksheets(InitGlobal.iFAbateTab).Range("A1048576").End(xlUp).Row
+End If
+
+'iForm Survey column locations & table length/width
+If TabExists(InitGlobal.iFSurveyTab) Then
+    iFSurvey_APN = HeadingColumn("apn", InitGlobal.iFSurveyTab, 1, True)
+    iFSurvey_Date = HeadingColumn("inspection_date", InitGlobal.iFSurveyTab, 1, True)
+    iFSurvey_LastCol = Worksheets(InitGlobal.iFSurveyTab).Range("A1").End(xlToRight).Column
+    iFSurvey_LastRow = Worksheets(InitGlobal.iFSurveyTab).Range("A1048576").End(xlUp).Row
+End If
+
+Call SetFolders
+
+End Sub
+
+
+
+
+
