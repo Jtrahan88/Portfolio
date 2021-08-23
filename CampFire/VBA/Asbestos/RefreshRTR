@@ -1,0 +1,55 @@
+Public Sub RefreshRTR_Click()
+
+Dim RTR_File As String
+Dim RTR_LastMod As Date
+Dim SourceWB As Workbook
+Dim TargetWB As Workbook
+Dim SvcCode As String
+
+Call Initialize
+OriginalSheet = ActiveSheet.Name
+
+Do While "Never" <> "End"
+
+    Call GetLatestFile(RTRFolder, InitGlobal.RTRFileName, RTR_File, RTR_LastMod)
+
+    If RTR_File > "" And RTR_LastMod <> Worksheets("File Updates").Range("C7").Value Then
+        If TabExists(InitGlobal.RTRTab) Then DeleteTab (InitGlobal.RTRTab)
+        Worksheets("File Updates").Range("C7").Value = ""  'Wipe out file update date/time
+        TabName = Left(RTR_File, InStr(RTR_File, ".csv") - 1)
+        TabName = Right(TabName, Len(TabName) - InStrRev(TabName, "\"))
+        Application.ScreenUpdating = False
+        Set SourceWB = Workbooks.Open(RTR_File)
+        Set TargetWB = ThisWorkbook
+        SourceWB.Sheets(TabName).Copy After:=TargetWB.Sheets(TargetWB.Sheets.Count)
+        ActiveSheet.Name = InitGlobal.RTRTab
+        SourceWB.Close False
+        Worksheets("File Updates").Range("C7").Value = RTR_LastMod
+        Call Initialize 'Update global variables that hold column numbers in case they changed w/ this version of the sheet
+        Exit Do
+    Else
+        If RTR_File > "" Then Exit Sub
+        BoxType = vbRetryCancel + vbCritical
+        If MsgBox("No RecoveryTrac file found to import", BoxType) = vbCancel Then Exit Sub
+    End If
+Loop
+Call Initialize
+
+For Each Cell In Sheets(InitGlobal.RTRTab).Range(Sheets(InitGlobal.RTRTab).Cells(2, RTR_APN), Sheets(InitGlobal.RTRTab).Cells(RTR_LastRow, RTR_APN))
+    APN = Left(Cell.Value, InStr(Cell.Value, "(") - 1)
+    SvcCode = Trim(Cell.Offset(, RTR_SvcCode - RTR_APN))
+    Cell.Offset(, RTR_SvcCode - RTR_APN).Value = SvcCode
+    If SvcCode = "10B" Or SvcCode = "55" Then '(55=Tip & 10B=Abatement)
+        Cell.Value = UCase(Left(APN, 3) + "-" + Mid(APN, 4, 3) + "-" + Mid(APN, 7, 3)) 'Reformat APN w/ dashes
+        If Len(APN) > 9 Then Cell.Value = UCase(Trim(Cell.Value + Right(APN, Len(APN) - 9)))
+        Cell.Offset(, RTR_Date - RTR_APN).Value = Int(Cell.Offset(, RTR_Date - RTR_APN).Value) 'Drop time to expedite comparison
+    End If
+Next Cell
+
+Sheets(InitGlobal.RTRTab).Visible = xlHidden
+Sheets(OriginalSheet).Activate
+Application.ScreenUpdating = True
+        
+End Sub
+
+
