@@ -1,0 +1,144 @@
+Sub CLEAR_ALL()
+'
+' Clear all data Macro
+'
+
+'
+    Range("B3:D3", Range("C3").End(xlDown)).Select
+
+    Selection.ClearContents
+End Sub
+
+
+Sub Reformat()
+
+
+
+
+    Sheets("Audit").Select
+    Application.ScreenUpdating = False
+    
+    'Debris Crew
+    Range("C3").Select
+    Selection.Value = "=VLOOKUP(A3,'Northern Branch Phase II Debris'!A:C,3,FALSE)"
+    Selection.AutoFill Destination:=Range("C3:C" & Range("A" & Rows.Count).End(xlUp).Row)
+    Range(Selection, Selection.End(xlDown)).Select
+    
+       'Division
+    Range("C3").Select
+    Selection.Value = "=VLOOKUP(A3,'Northern Branch Phase II Debris'!A:D,3,FALSE)"
+    Selection.AutoFill Destination:=Range("C3:C" & Range("A" & Rows.Count).End(xlUp).Row)
+    Range(Selection, Selection.End(xlDown)).Select
+    
+    
+    'County
+    Range("E3").Select
+    Selection.Value = "=VLOOKUP(A3,'Northern Branch Phase II Debris'!A:N,11,FALSE)"
+    Selection.AutoFill Destination:=Range("E3:E" & Range("A" & Rows.Count).End(xlUp).Row)
+    Range(Selection, Selection.End(xlDown)).Select
+    
+    'Debris Crew Leader/Crew#
+    Range("H3").Select
+    Selection.Value = "=VLOOKUP(A3,'Northern Branch Phase II Debris'!A:N,12,FALSE)"
+    Selection.AutoFill Destination:=Range("H3:H" & Range("A" & Rows.Count).End(xlUp).Row)
+    Range(Selection, Selection.End(xlDown)).Select
+
+    Application.ScreenUpdating = True
+    
+
+End Sub
+
+
+
+
+Sub CompletedChecks()
+'
+' SmartSheets Macro
+'
+' Keyboard Shortcut: Ctrl+Shift+M
+Application.ScreenUpdating = False
+'
+    Sheets("Northern Branch Phase II Debris").Select
+    Cells.Select
+    With Selection.Interior
+        .Pattern = xlNone
+    End With
+    With Selection.Font
+        .ColorIndex = xlAutomatic
+    End With
+
+
+
+Dim currentColumn As Integer
+Dim columnHeading As String
+
+For currentColumn = ActiveSheet.UsedRange.Columns.Count To 1 Step -1
+    columnHeading = ActiveSheet.UsedRange.Cells(1, currentColumn).Value
+
+'Check whether to preserve the column
+    Select Case columnHeading
+    'Insert name of columns to preserve
+        Case "APN", "Debris Crew", "County", "Debris Crew Leader/Crew#", "Division"
+            'Do nothing
+        Case Else
+            'Delete the columns not wanted/ listed above
+            ActiveSheet.Columns(currentColumn).Delete
+        End Select
+    Next
+    
+      'List the column headers in the end result order you want to keep them.
+  arrColOrder = Array("APN", "Debris Crew", "Division", "County", "Debris Crew Leader/Crew#")
+ 
+  counter = 1
+ 
+ 'LOOPS THAT MOVES COLUMNS AROUND BY ABOVE CODE SO THEY APPEAR IN THE ORDER YOU SPECIFIED.
+  For ndx = LBound(arrColOrder) To UBound(arrColOrder)
+ 
+  Set Found = Rows("1:1").Find(arrColOrder(ndx), LookIn:=xlValues, LookAt:=xlWhole, _
+  SearchOrder:=xlByColumns, SearchDirection:=xlNext, MatchCase:=False)
+ 
+  If Not Found Is Nothing Then
+  If Found.Column <> counter Then
+  Found.EntireColumn.Cut
+  Columns(counter).Insert Shift:=xlToRight
+  Application.CutCopyMode = False
+  End If
+  counter = counter + 1
+  End If
+ 
+  Next ndx
+ 
+    Cells.Select
+    Cells.EntireColumn.AutoFit
+    
+    Sheets("Audit").Select
+    
+    'Debris Crew
+    Range("B3").Select
+    Selection.Value = "=VLOOKUP(A3,'Northern Branch Phase II Debris'!A:D,2,FALSE)"
+    Selection.AutoFill Destination:=Range("B3:B" & Range("A" & Rows.Count).End(xlUp).Row)
+    Range(Selection, Selection.End(xlDown)).Select
+    
+     'Division
+    Range("C3").Select
+    Selection.Value = "=VLOOKUP(A3,'Northern Branch Phase II Debris'!A:D,3,FALSE)"
+    Selection.AutoFill Destination:=Range("C3:C" & Range("A" & Rows.Count).End(xlUp).Row)
+    Range(Selection, Selection.End(xlDown)).Select
+    
+    'County
+    Range("D3").Select
+    Selection.Value = "=VLOOKUP(A3,'Northern Branch Phase II Debris'!A:D,4,FALSE)"
+    Selection.AutoFill Destination:=Range("D3:D" & Range("A" & Rows.Count).End(xlUp).Row)
+    Range(Selection, Selection.End(xlDown)).Select
+    
+    'Debris Crew Leader/Crew#
+    Range("E3").Select
+    Selection.Value = "=VLOOKUP(A3,'Northern Branch Phase II Debris'!A:E,5,FALSE)"
+    Selection.AutoFill Destination:=Range("E3:E" & Range("A" & Rows.Count).End(xlUp).Row)
+    Range(Selection, Selection.End(xlDown)).Select
+    
+    
+    Range("A1").Select
+     
+End Sub
+
