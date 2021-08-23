@@ -1,0 +1,76 @@
+Public Sub RefreshDash_Click()
+
+Dim Dash_File As String
+Dim Dash_LastMod As Date
+Dim SourceWB As Workbook
+Dim TargetWB As Workbook
+Dim MHPAPN2() As Variant
+
+Call Initialize
+OriginalSheet = ActiveSheet.Name
+
+Do While "Never" <> "End"
+
+    Call GetLatestFile(DashFolder, InitGlobal.DBFileName, Dash_File, Dash_LastMod)
+
+    If Dash_File > "" And Dash_LastMod <> Worksheets("File Updates").Range("C4").Value Then
+        If TabExists(InitGlobal.DBTab) Then DeleteTab (InitGlobal.DBTab)
+        Worksheets("File Updates").Range("C5").Value = ""  'Wipe out file update date/time
+        Application.ScreenUpdating = False
+        
+        Set SourceWB = Workbooks.Open(Dash_File)
+        Set TargetWB = ThisWorkbook
+        SourceWB.Sheets(InitGlobal.DBTab).Copy After:=TargetWB.Sheets(TargetWB.Sheets.Count)
+        SourceWB.Close False
+        Worksheets("File Updates").Range("C5").Value = Dash_LastMod
+        Call Initialize 'Update global variables that hold column numbers in case they changed w/ this version of the sheet
+        
+        'Build a pseudo APN to facilitate MHP lookups
+        Sheets(DBTab).Columns(DB_APN + 1).Insert Shift:=xlToRight, CopyOrigin:=xlFormatFromLeftOrAbove
+        Sheets(DBTab).Range(Sheets(InitGlobal.DBTab).Cells(1, DB_APN + 1), Sheets(InitGlobal.DBTab).Cells(1, DB_APN + 1)) = "MHP APN"
+        Call Initialize 'Update Column numbers now that we've added one
+        For Each Cell In Sheets(InitGlobal.DBTab).Range(Sheets(InitGlobal.DBTab).Cells(2, DB_APN), Sheets(InitGlobal.DBTab).Cells(DB_LastRow, DB_APN))
+            Address = Cell.Offset(, DB_Address - DB_APN)
+            MHPAPN = Left(Cell.Value, 11)
+            If InStr(Address, " ") - InStr(Address, "_") > 0 Then
+                If InStr(Address, "_") > 0 Then MHPAPN = MHPAPN + Mid(Address, InStr(Address, "_"), InStr(Address, " ") - InStr(Address, "_"))
+            End If
+            Cell.Offset(, 1) = MHPAPN
+        Next Cell
+        idx = 0
+        MHPAPN2 = Range(Sheets(InitGlobal.DBTab).Cells(2, DB_MHPAPN), Sheets(InitGlobal.DBTab).Cells(DB_LastRow + 1, DB_MHPAPN))
+        For Each Cell In Sheets(InitGlobal.DBTab).Range(Sheets(InitGlobal.DBTab).Cells(2, DB_MHPAPN), Sheets(InitGlobal.DBTab).Cells(DB_LastRow, DB_MHPAPN))
+            idx = idx + 1
+            Count = WorksheetFunction.CountIf(Sheets(DBTab).Range(Sheets(DBTab).Cells(2, DB_MHPAPN), Sheets(DBTab).Cells(DB_LastRow, DB_MHPAPN)), Cell.Value)
+            If Count > 1 And InStr(Cell.Value, "_") = 0 Then 'It's a split or incorrectly set up MHP
+                MHPAPN2(idx, 1) = Cell.Value & "_" & Left(Cell.Offset(, DB_Address - DB_MHPAPN), InStr(Cell.Offset(, DB_Address - DB_MHPAPN), " ") - 1)
+            Else
+                MHPAPN2(idx, 1) = Cell.Value
+            End If
+            
+            If Not IsError(Application.Match(Cell.Offset(, DB_GlobalID - DB_MHPAPN), Range(Sheets(XRefTab).Cells(2, XRef_GlobalID), Sheets(XRefTab).Cells(XRef_LastRow, XRef_GlobalID)), 0)) Then
+                GlobalID_Row = Application.Match(Cell.Offset(, DB_GlobalID - DB_MHPAPN), Range(Sheets(XRefTab).Cells(2, XRef_GlobalID), Sheets(XRefTab).Cells(XRef_LastRow, XRef_GlobalID)), 0) + 1
+                MHPAPN2(idx, 1) = Sheets(XRefTab).Range(Sheets(XRefTab).Cells(GlobalID_Row, XRef_APN), Sheets(XRefTab).Cells(GlobalID_Row, XRef_APN))
+            End If
+            
+        Next Cell
+        
+        Range(Sheets(InitGlobal.DBTab).Cells(2, DB_MHPAPN), Sheets(InitGlobal.DBTab).Cells(DB_LastRow + 1, DB_MHPAPN)) = MHPAPN2
+        
+        Exit Do
+    Else
+        If Dash_File > "" Then Exit Sub
+        BoxType = vbRetryCancel + vbCritical
+        If MsgBox("No Dashboard file found to import", BoxType) = vbCancel Then Exit Sub
+    End If
+Loop
+
+Sheets(InitGlobal.DBTab).Activate
+Columns(InitGlobal.DB_APN).Replace What:="-000", Replacement:="", LookAt:=xlPart, SearchOrder:=xlByRows, _
+                                   MatchCase:=False, SearchFormat:=False, ReplaceFormat:=False
+
+Sheets(InitGlobal.DBTab).Visible = xlHidden
+Sheets(OriginalSheet).Activate
+Application.ScreenUpdating = True
+        
+End Sub
