@@ -1,0 +1,246 @@
+Dim DBError As Boolean
+Dim BFIError As Boolean
+Dim DailyQCError As Boolean
+Dim iFormError As Boolean
+Dim RTRError As Boolean
+Dim APNError As Boolean
+Dim GPSError As Boolean
+
+
+Sub Chimneys_Click()
+
+Call Initialize
+SelectDate = Range("D1")
+
+'Clean up existing data
+LastRow = ActiveSheet.Range("J1048576").End(xlUp).Row
+If Range("J5") > "" Then
+    With ActiveSheet.Range("J5:s" & LastRow)
+        .ClearContents
+        .Interior.Color = xlNone
+        .Borders.LineStyle = xlNone
+        .Font.Bold = False
+    End With
+End If
+ActiveSheet.Range("J4:S4").Interior.Color = xlNone
+
+Columns("LD:LE").EntireColumn.Delete
+Range("LE4") = "APN" ' Column #317
+
+'Copy APN list from BFI
+APNRow = 5
+For Each Cell In Sheets(InitGlobal.BFITab).Range(Sheets(InitGlobal.BFITab).Cells(2, BFI_APN), Sheets(InitGlobal.BFITab).Cells(BFI_LastRow, BFI_APN))
+    BFITipDate = Sheets(InitGlobal.BFITab).Range(Sheets(InitGlobal.BFITab).Cells(Cell.Row, BFI_TipDate), Sheets(InitGlobal.BFITab).Cells(Cell.Row, BFI_TipDate)).Value
+    If BFITipDate = SelectDate Then
+        ActiveSheet.Range(Cells(APNRow, 317), Cells(APNRow, 317)).Value = Cell.Value
+        ActiveSheet.Range(Cells(APNRow, 316), Cells(APNRow, 316)).Value = "BFI"
+        APNRow = APNRow + 1
+    End If
+Next Cell
+    
+'Copy APN list from Dashboard
+For Each Cell In Sheets(InitGlobal.DBTab).Range(Sheets(InitGlobal.DBTab).Cells(2, DB_APN), Sheets(InitGlobal.DBTab).Cells(DB_LastRow, DB_APN))
+    DBTipDate = DashDate(Sheets(InitGlobal.DBTab).Range(Sheets(InitGlobal.DBTab).Cells(Cell.Row, DB_TipDate), Sheets(InitGlobal.DBTab).Cells(Cell.Row, DB_TipDate)).Value)
+    If Int(DBTipDate) = SelectDate Then
+        ActiveSheet.Range(Cells(APNRow, 317), Cells(APNRow, 317)).Value = Cell.Value
+        ActiveSheet.Range(Cells(APNRow, 316), Cells(APNRow, 316)).Value = "Dash"
+        APNRow = APNRow + 1
+    End If
+Next Cell
+
+'Copy APN list from Daily QC
+For Each Cell In Sheets(InitGlobal.TipsTab).Range(Sheets(InitGlobal.TipsTab).Cells(2, Tip_APN), Sheets(InitGlobal.TipsTab).Cells(Tip_LastRow, Tip_APN))
+    TipDate = Sheets(InitGlobal.TipsTab).Range(Sheets(InitGlobal.TipsTab).Cells(Cell.Row, Tip_Date), Sheets(InitGlobal.TipsTab).Cells(Cell.Row, Tip_Date)).Value
+    If TipDate = SelectDate Then
+        ActiveSheet.Range(Cells(APNRow, 317), Cells(APNRow, 317)).Value = Cell.Value
+        ActiveSheet.Range(Cells(APNRow, 316), Cells(APNRow, 316)).Value = "DailyQC"
+        APNRow = APNRow + 1
+    End If
+Next Cell
+
+'Copy APN list from iForm
+For Each Cell In Sheets(InitGlobal.iFChimTab).Range(Sheets(InitGlobal.iFChimTab).Cells(2, iFChim_APN), Sheets(InitGlobal.iFChimTab).Cells(iFChim_LastRow, iFChim_APN))
+    TipDate = Sheets(InitGlobal.iFChimTab).Range(Sheets(InitGlobal.iFChimTab).Cells(Cell.Row, iFChim_Date), Sheets(InitGlobal.iFChimTab).Cells(Cell.Row, iFChim_Date)).Value2
+    If TipDate = SelectDate Then
+        ActiveSheet.Range(Cells(APNRow, 317), Cells(APNRow, 317)).Value = Cell.Value
+        ActiveSheet.Range(Cells(APNRow, 316), Cells(APNRow, 316)).Value = "iForm"
+        APNRow = APNRow + 1
+    End If
+Next Cell
+
+'Copy APN list from RTR
+For Each Cell In Sheets(InitGlobal.RTRTab).Range(Sheets(InitGlobal.RTRTab).Cells(2, RTR_APN), Sheets(InitGlobal.RTRTab).Cells(RTR_LastRow, RTR_APN))
+    TipDate = Sheets(InitGlobal.RTRTab).Range(Sheets(InitGlobal.RTRTab).Cells(Cell.Row, RTR_Date), Sheets(InitGlobal.RTRTab).Cells(Cell.Row, RTR_Date)).Value
+    SvcCode = Sheets(InitGlobal.RTRTab).Range(Sheets(InitGlobal.RTRTab).Cells(Cell.Row, RTR_SvcCode), Sheets(InitGlobal.RTRTab).Cells(Cell.Row, RTR_SvcCode)).Value
+    If IsError(TipDate) Then TipDate = 0
+    If TipDate = SelectDate And SvcCode = 55 Then
+        ActiveSheet.Range(Cells(APNRow, 317), Cells(APNRow, 317)).Value = Cell.Value
+        ActiveSheet.Range(Cells(APNRow, 316), Cells(APNRow, 316)).Value = "RTR"
+        APNRow = APNRow + 1
+    End If
+Next Cell
+
+
+'Remove duplicate APNs, then sort & paste into Surveys column
+If ActiveSheet.Range("LE5") = "" Then Exit Sub ' No APN's found...nothing to do
+ActiveSheet.Range("LE4:LE" & ActiveSheet.Range("LE1048576").End(xlUp).Row).RemoveDuplicates Columns:=Array(1), Header:=xlYes
+LastRow = ActiveSheet.Range("LE1048576").End(xlUp).Row
+ActiveSheet.Range("LE4:LE" & LastRow).Sort Key1:=Range("LE4"), Order1:=xlAscending, Header:=xlYes
+ActiveSheet.Range("LE5:LE" & LastRow).Copy
+ActiveSheet.Range("J5").PasteSpecial Paste:=xlPasteValues
+ActiveSheet.Range("J1").Select
+
+APNError = False
+DBError = False
+BFIError = False
+DailyQCError = False
+RTRError = False
+iFormError = False
+GPSError = False
+
+'Add lookup info for each APN
+LastRow = ActiveSheet.Range("J1048576").End(xlUp).Row
+For Each Cell In ActiveSheet.Range("J5:J" & LastRow)
+    'Verify APN
+    If IsError(Application.VLookup(Cell.Value, Sheets(InitGlobal.BFITab).Range(Sheets(BFITab).Cells(2, BFI_APN), Sheets(BFITab).Cells(BFI_LastRow, BFI_LastCol)), 1, False)) Then
+        Cell.Font.Bold = True
+        Cell.Interior.Color = RGB(255, 0, 0)
+        APNError = True
+    Else
+        Cell.Offset(, 1).Value = Application.VLookup(Cell.Value, Sheets(InitGlobal.BFITab).Range(Sheets(BFITab).Cells(2, BFI_APN), Sheets(BFITab).Cells(BFI_LastRow, BFI_LastCol)), BFI_AddressNbr - BFI_APN + 1, False) & " " & _
+                                 Application.VLookup(Cell.Value, Sheets(InitGlobal.BFITab).Range(Sheets(BFITab).Cells(2, BFI_APN), Sheets(BFITab).Cells(BFI_LastRow, BFI_LastCol)), BFI_Street - BFI_APN + 1, False)
+    End If
+        
+    'Dashboard
+    TipDate = DashDate(Application.VLookup(Cell.Value, Sheets(InitGlobal.DBTab).Range(Sheets(DBTab).Cells(2, DB_APN), Sheets(DBTab).Cells(DB_LastRow, DB_LastCol)), DB_TipDate - DB_APN + 1, False))
+    If IsError(TipDate) Then
+        TipDate = 0
+        Cell.Offset(, 2) = "No Record"
+        Cell.Offset(, 2).Font.Bold = True
+    End If
+    If TipDate = 0 Then
+        Cell.Offset(, 2).Interior.Color = RGB(255, 255, 153)
+        DBError = True
+    Else
+        Cell.Offset(, 2) = Int(TipDate)
+        If Int(TipDate) <> SelectDate Then
+            Cell.Offset(, 2).Interior.Color = RGB(255, 255, 153)
+            DBError = True
+        End If
+    End If
+    
+    'BFI
+    TipDate = Application.VLookup(Cell.Value, Sheets(InitGlobal.BFITab).Range(Sheets(InitGlobal.BFITab).Cells(2, BFI_APN), Sheets(BFITab).Cells(BFI_LastRow, BFI_LastCol)), BFI_TipDate - BFI_APN + 1, False)
+    If IsError(TipDate) Then
+        TipDate = 0
+        Cell.Offset(, 3) = "No Record"
+        Cell.Offset(, 3).Font.Bold = True
+    End If
+    If TipDate = 0 Then
+        Cell.Offset(, 3).Interior.Color = RGB(255, 255, 153)
+        BFIError = True
+    Else
+        Cell.Offset(, 3) = Int(TipDate)
+        If Int(TipDate) <> SelectDate Then
+            Cell.Offset(, 3).Interior.Color = RGB(255, 255, 153)
+            BFIError = True
+        End If
+    End If
+    
+    'Daily QC
+    With Sheets(InitGlobal.TipsTab)
+     Cell.Offset(, 4) = WorksheetFunction.CountIfs(.Range(Sheets(TipsTab).Cells(2, Tip_APN), .Cells(Tip_LastRow, Tip_APN)), Cell.Value, _
+                                                   .Range(Sheets(TipsTab).Cells(2, Tip_Date), .Cells(Tip_LastRow, Tip_Date)), ActiveSheet.Range("D1"))
+    End With
+    If Cell.Offset(, 4) <> 1 Then
+        Cell.Offset(, 4).Interior.Color = RGB(255, 255, 153)
+        DailyQCError = True
+    End If
+    ChimTeam = Application.VLookup(Cell.Value, Sheets(InitGlobal.TipsTab).Range(Sheets(TipsTab).Cells(2, Tip_APN), Sheets(TipsTab).Cells(Tip_LastRow, Tip_LastCol)), Tip_Team - Tip_APN + 1, False)
+    If IsError(ChimTeam) Then ChimTeam = ""
+    
+    'iForm (TetraForms)
+    With Sheets(InitGlobal.iFChimTab)
+        Cell.Offset(, 5) = WorksheetFunction.CountIfs(.Range(Sheets(iFChimTab).Cells(2, iFChim_APN), .Cells(iFChim_LastRow, iFChim_APN)), Cell.Value, _
+                                                      .Range(Sheets(iFChimTab).Cells(2, iFChim_Date), .Cells(iFChim_LastRow, iFChim_Date)), ActiveSheet.Range("D1"))
+    End With
+    If Cell.Offset(, 5) <> 1 Then
+        Cell.Offset(, 5).Interior.Color = RGB(255, 255, 153)
+        iFormError = True
+    End If
+    If ChimTeam = "" Then
+        ChimTeam = Application.VLookup(Cell.Value, Sheets(InitGlobal.iFChimTab).Range(Sheets(iFChimTab).Cells(2, iFChim_APN), Sheets(iFChimTab).Cells(iFChim_LastRow, iFChim_LastCol)), iFChim_Team - iFChim_APN + 1, False)
+        If IsError(ChimTeam) Then
+            ChimTeam = ""
+            Cell.Offset(, 9).Interior.Color = RGB(255, 255, 153)
+            TeamError = True
+        End If
+    End If
+    Cell.Offset(, 9) = ChimTeam
+
+         
+    'RecoveryTrac (RTR)
+    With Sheets(InitGlobal.RTRTab)
+        Cell.Offset(, 6) = WorksheetFunction.CountIfs(.Range(Sheets(RTRTab).Cells(2, RTR_APN), .Cells(RTR_LastRow, RTR_APN)), Cell.Value, _
+                                                      .Range(Sheets(RTRTab).Cells(2, RTR_Date), .Cells(RTR_LastRow, RTR_Date)), ActiveSheet.Range("D1"), _
+                                                      .Range(Sheets(RTRTab).Cells(2, RTR_SvcCode), .Cells(RTR_LastRow, RTR_SvcCode)), 55)
+    End With
+    If Cell.Offset(, 6) <> 1 Then
+        Cell.Offset(, 6).Interior.Color = RGB(255, 255, 153)
+        RTRError = True
+    End If
+    
+    RTR_Row = 1 'Start at row 2
+RTR_Retry:
+    If Not IsError(Application.Match(Cell.Value, Range(Sheets(RTRTab).Cells(RTR_Row + 1, RTR_APN), Sheets(RTRTab).Cells(RTR_LastRow, RTR_APN)), 0)) Then
+        RTR_Row = RTR_Row + Application.Match(Cell.Value, Range(Sheets(RTRTab).Cells(RTR_Row + 1, RTR_APN), Sheets(RTRTab).Cells(RTR_LastRow, RTR_APN)), 0)
+        If Sheets(RTRTab).Range(Sheets(RTRTab).Cells(RTR_Row, RTR_SvcCode), Sheets(RTRTab).Cells(RTR_Row, RTR_SvcCode)) <> 55 Then GoTo RTR_Retry
+        Cell.Offset(, 7) = Sheets(RTRTab).Range(Sheets(RTRTab).Cells(RTR_Row, RTR_Ticket), Sheets(RTRTab).Cells(RTR_Row, RTR_Ticket))
+        Cell.Offset(, 8) = Sheets(RTRTab).Range(Sheets(RTRTab).Cells(RTR_Row, RTR_Latitude), Sheets(RTRTab).Cells(RTR_Row, RTR_Latitude)) & ",  " & _
+                           Sheets(RTRTab).Range(Sheets(RTRTab).Cells(RTR_Row, RTR_Longitude), Sheets(RTRTab).Cells(RTR_Row, RTR_Longitude))
+    Else
+        Cell.Offset(, 7).Interior.Color = RGB(255, 255, 153)
+        Cell.Offset(, 8).Interior.Color = RGB(255, 255, 153)
+        TicketError = True
+        GPSError = True
+    End If
+    
+    
+Next Cell
+
+If APNError Then Range("J4").Interior.Color = RGB(255, 0, 0)
+If DBError Then Range("L4").Interior.Color = RGB(255, 255, 153)
+If BFIError Then Range("M4").Interior.Color = RGB(255, 255, 153)
+If DailyQCError Then Range("N4").Interior.Color = RGB(255, 255, 153)
+If iFormError Then Range("O4").Interior.Color = RGB(255, 255, 153)
+If RTRError Then Range("P4").Interior.Color = RGB(255, 255, 153)
+If TicketError Then Range("Q4").Interior.Color = RGB(255, 255, 153)
+If TeamError Then Range("S4").Interior.Color = RGB(255, 255, 153)
+If GPSError Then Range("R4").Interior.Color = RGB(255, 255, 153)
+
+'Put borders around used cells
+LastRow = ActiveSheet.Range("J1048576").End(xlUp).Row
+ActiveSheet.Range("J5:S" & LastRow).Borders.LineStyle = xlContinuous
+
+'Put heavier borders around duplicated base APN's
+LastRow = ActiveSheet.Range("J1048576").End(xlUp).Row
+LastBaseAPN = ""
+FirstRow = 0
+For Each Cell In ActiveSheet.Range("J5:J" & LastRow)
+    If Left(Cell.Value, 11) <> LastBaseAPN Then
+        If FirstRow > 0 And FirstRow <> Cell.Row - 1 Then
+            ActiveSheet.Range(Cells(FirstRow, Cell.Column), Cells(Cell.Row - 1, Cell.Column + 9)).BorderAround Weight:=xlMedium
+        End If
+        LastBaseAPN = Left(Cell.Value, 11)
+        FirstRow = Cell.Row
+    End If
+Next Cell
+
+If FirstRow > 0 And FirstRow <> LastRow Then
+    ActiveSheet.Range(Cells(FirstRow, 10), Cells(LastRow, 17)).BorderAround Weight:=xlMedium
+End If
+
+
+End Sub
+
+
