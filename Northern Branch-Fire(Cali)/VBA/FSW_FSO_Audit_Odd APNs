@@ -1,0 +1,456 @@
+Sub Call_ALL()
+
+Application.ScreenUpdating = False
+
+Call SmartSheets_ODD
+Call FSW_FSO_ODD
+Call RTRCheck_ODD
+Call MATCHING_ODD
+
+Application.ScreenUpdating = True
+
+End Sub
+
+
+Sub SmartSheets_ODD()
+
+'
+' SmartSheets Macro
+'
+' Keyboard Shortcut: Ctrl+Shift+M
+Application.ScreenUpdating = False
+'
+    Sheets("Northern Branch Phase II Debris").Select 'select the sheet you want to format
+  '  Cells.Select
+  '  With Selection.Interior
+  '      .Pattern = xlNone
+  '  End With
+  '  With Selection.Font
+   '     .ColorIndex = xlAutomatic          'makes black and white
+    'End With
+  
+
+
+Dim currentColumn As Integer
+Dim columnHeading As String
+
+For currentColumn = ActiveSheet.UsedRange.Columns.Count To 1 Step -1
+    columnHeading = ActiveSheet.UsedRange.Cells(1, currentColumn).Value
+
+'Check whether to preserve the column
+    Select Case columnHeading
+    'Insert name of columns to preserve
+        Case "APN", "Haz Trees", "Street #", "Street Name", "County", "Soil Samples Approved", "Hydromulch Complete", "Wattles Complete", _
+        "Erosion Control Waiver", "FSO Complete", "FSO Sent to County"           'name column heading you want to keep
+        
+        
+            'Do nothing
+        Case Else
+            'Delete the columns not wanted/ listed above
+            ActiveSheet.Columns(currentColumn).Delete
+        End Select
+    Next
+    
+      'List the column headers in the end result order you want to keep them.
+  arrColOrder = Array("APN", "Haz Trees", "Street #", "Street Name", "County", "Soil Samples Approved", "Hydromulch Complete", "Wattles Complete", _
+        "Erosion Control Waiver", "FSO Complete", "FSO Sent to County")    'list the order you want your column names
+ 
+  counter = 1
+ 
+ 'LOOPS THAT MOVES COLUMNS AROUND BY ABOVE CODE SO THEY APPEAR IN THE ORDER YOU SPECIFIED.
+  For ndx = LBound(arrColOrder) To UBound(arrColOrder)
+ 
+  Set Found = Rows("1:1").Find(arrColOrder(ndx), LookIn:=xlValues, LookAt:=xlWhole, _
+  SearchOrder:=xlByColumns, SearchDirection:=xlNext, MatchCase:=False)
+ 
+  If Not Found Is Nothing Then
+  If Found.Column <> counter Then
+  Found.EntireColumn.Cut
+  Columns(counter).Insert Shift:=xlToRight
+  Application.CutCopyMode = False
+  End If
+  counter = counter + 1
+  End If
+ 
+  Next ndx
+ 
+    Cells.Select
+    Cells.EntireColumn.AutoFit
+    
+    Sheets("Audit for Odd APNs").Select 'select sheet you want to put formulas in
+    
+        'Street #
+    Range("D2").Select
+    Selection.Value = "=VLOOKUP(C2,'Northern Branch Phase II Debris'!A:C,3,FALSE)" 'put vlookup formula here in between ""
+    Selection.AutoFill Destination:=Range("D2:D" & Range("C" & Rows.Count).End(xlUp).Row)
+    
+    
+        'Address STREET NAME
+    Range("E2").Select
+    Selection.Value = "=VLOOKUP(C2,'Northern Branch Phase II Debris'!A:D,4,FALSE)" 'put vlookup formula here in between ""
+    Selection.AutoFill Destination:=Range("E2:E" & Range("C" & Rows.Count).End(xlUp).Row)
+    
+    
+        'Hydromulch Date in Smart Sheets
+    Range("L2").Select
+    Selection.Value = "=VLOOKUP(C2,'Northern Branch Phase II Debris'!A:G,7,FALSE)" 'put vlookup formula here in between ""
+    Selection.AutoFill Destination:=Range("L2:L" & Range("C" & Rows.Count).End(xlUp).Row)
+    
+    
+        'Wattles Date in Smart Sheets
+    Range("O2").Select
+    Selection.Value = "=VLOOKUP(C2,'Northern Branch Phase II Debris'!A:H,8,FALSE)" 'put vlookup formula here in between ""
+    Selection.AutoFill Destination:=Range("O2:O" & Range("C" & Rows.Count).End(xlUp).Row)
+    
+    
+        'Erosion Control Waiver Date in Smart Sheets
+    Range("R2").Select
+    Selection.Value = "=VLOOKUP(C2,'Northern Branch Phase II Debris'!A:I,9,FALSE)" 'put vlookup formula here in between ""
+    Selection.AutoFill Destination:=Range("R2:R" & Range("C" & Rows.Count).End(xlUp).Row)
+    
+    
+    'Haz Trees  in Smart Sheets
+    Range("U2").Select
+    Selection.Formula = "=VLOOKUP(C2,'Northern Branch Phase II Debris'!A:B,2,FALSE)"   'Put the add text formula here ""
+    Selection.AutoFill Destination:=Range("U2:U" & Range("C" & Rows.Count).End(xlUp).Row)
+    
+    
+    'Soil Results  in Smart Sheets
+    Range("X2").Select
+    Selection.Formula = "=VLOOKUP(C2,'Northern Branch Phase II Debris'!A:F,6,FALSE)"   'Put the add text formula here ""
+    Selection.AutoFill Destination:=Range("X2:X" & Range("C" & Rows.Count).End(xlUp).Row)
+    
+    'FSO Complete in Smart Sheets
+    Range("AA2").Select
+    Selection.Formula = "=VLOOKUP(C2,'Northern Branch Phase II Debris'!A:J,10,FALSE)"   'Put the add text formula here ""
+    Selection.AutoFill Destination:=Range("AA2:AA" & Range("C" & Rows.Count).End(xlUp).Row)
+    
+    
+    
+    'FSO Sent to County in Smart Sheets
+    Range("AD2").Select
+    Selection.Formula = "=VLOOKUP(C2,'Northern Branch Phase II Debris'!A:K,11,FALSE)"   'Put the add text formula here ""
+    Selection.AutoFill Destination:=Range("AD2:AD" & Range("C" & Rows.Count).End(xlUp).Row)
+    
+    
+    'FSO Sent to County in Smart Sheets
+    'NO DATA IN SMART SHEETS FOR THIS COLUMN
+    
+   
+    'Sheets("Audit").Select
+    Range("A1").Select
+    
+    Application.ScreenUpdating = True
+    
+    End Sub
+
+Sub FSW_FSO_ODD()
+
+'
+' SmartSheets Macro
+'
+' Keyboard Shortcut: Ctrl+Shift+M
+Application.ScreenUpdating = False
+'
+    Sheets("FSO Tracker").Select 'select the sheet you want to format
+  '  Cells.Select
+  '  With Selection.Interior
+  '      .Pattern = xlNone
+  '  End With
+  '  With Selection.Font
+   '     .ColorIndex = xlAutomatic          'makes black and white
+    'End With
+  
+
+
+Dim currentColumn As Integer
+Dim columnHeading As String
+
+For currentColumn = ActiveSheet.UsedRange.Columns.Count To 1 Step -1
+    columnHeading = ActiveSheet.UsedRange.Cells(1, currentColumn).Value
+
+'Check whether to preserve the column
+    Select Case columnHeading
+    'Insert name of columns to preserve
+        Case "APN", "FSO Pass/Fail", "FSW Pass/Fail", "Ticket", "FSW Complete", "Street #", "Street Name", "County", "Haz Trees", "Soil Results", "Hydromulch Complete", "Wattles Complete", _
+        "Erosion Control Waiver", "FSO Complete", "FSO Sent to County", "FSO Returned From County"           'name column heading you want to keep
+        
+        
+            'Do nothing
+        Case Else
+            'Delete the columns not wanted/ listed above
+            ActiveSheet.Columns(currentColumn).Delete
+        End Select
+    Next
+    
+      'List the column headers in the end result order you want to keep them.
+  arrColOrder = Array("APN", "FSO Pass/Fail", "FSW Pass/Fail", "Ticket", "FSW Complete", "Street #", "Street Name", "County", "Haz Trees", "Soil Results", "Hydromulch Complete", "Wattles Complete", _
+        "Erosion Control Waiver", "FSO Complete", "FSO Sent to County", "FSO Returned From County")    'list the order you want your column names
+ 
+  counter = 1
+ 
+ 'LOOPS THAT MOVES COLUMNS AROUND BY ABOVE CODE SO THEY APPEAR IN THE ORDER YOU SPECIFIED.
+  For ndx = LBound(arrColOrder) To UBound(arrColOrder)
+ 
+  Set Found = Rows("1:1").Find(arrColOrder(ndx), LookIn:=xlValues, LookAt:=xlWhole, _
+  SearchOrder:=xlByColumns, SearchDirection:=xlNext, MatchCase:=False)
+ 
+  If Not Found Is Nothing Then
+  If Found.Column <> counter Then
+  Found.EntireColumn.Cut
+  Columns(counter).Insert Shift:=xlToRight
+  Application.CutCopyMode = False
+  End If
+  counter = counter + 1
+  End If
+ 
+  Next ndx
+ 
+    Cells.Select
+    Cells.EntireColumn.AutoFit
+    
+    Sheets("Audit for Odd APNs").Select 'select sheet you want to put formulas in
+    
+    'FSO Pass/Fail in FSO Tracker
+    Range("F2").Select
+    Selection.Value = "=VLOOKUP(C2,'FSO Tracker'!A:B,2,FALSE)" 'put vlookup formula here in between ""
+    Selection.AutoFill Destination:=Range("F2:F" & Range("C" & Rows.Count).End(xlUp).Row)
+    
+    
+    'FSW Pass/Fail in FSO Tracker
+    Range("G2").Select
+    Selection.Value = "=F2" 'put vlookup formula here in between ""
+    Selection.AutoFill Destination:=Range("G2:G" & Range("C" & Rows.Count).End(xlUp).Row)
+    
+    'Ticket in FSO Tracker
+    Range("H2").Select
+    Selection.Value = "=VLOOKUP(C2,'FSO Tracker'!A:D,4,FALSE)" 'put vlookup formula here in between ""
+    Selection.AutoFill Destination:=Range("H2:H" & Range("C" & Rows.Count).End(xlUp).Row)
+    
+    'Hydromulch Date in FSO Tracker
+    Range("M2").Select
+    Selection.Value = "=VLOOKUP(C2,'FSO Tracker'!A:K,11,FALSE)" 'put vlookup formula here in between ""
+    Selection.AutoFill Destination:=Range("M2:M" & Range("C" & Rows.Count).End(xlUp).Row)
+    
+    'Wattles Date in FSO Tracker
+    Range("P2").Select
+    Selection.Value = "=VLOOKUP(C2,'FSO Tracker'!A:L,12,FALSE)" 'put vlookup formula here in between ""
+    Selection.AutoFill Destination:=Range("P2:P" & Range("C" & Rows.Count).End(xlUp).Row)
+    
+    'Erosion Control Waiver Date in FSO Tracker
+    Range("S2").Select
+    Selection.Value = "=VLOOKUP(C2,'FSO Tracker'!A:M,13,FALSE)" 'put vlookup formula here in between ""
+    Selection.AutoFill Destination:=Range("S2:S" & Range("C" & Rows.Count).End(xlUp).Row)
+    
+    'Haz Trees in FSO Tracker
+    Range("V2").Select
+    Selection.Value = "=VLOOKUP(C2,'FSO Tracker'!A:I,9,FALSE)" 'put vlookup formula here in between ""
+    Selection.AutoFill Destination:=Range("V2:V" & Range("C" & Rows.Count).End(xlUp).Row)
+    
+    'Soil Results in FSO Tracker
+    Range("Y2").Select
+    Selection.Value = "=VLOOKUP(C2,'FSO Tracker'!A:J,10,FALSE)" 'put vlookup formula here in between ""
+    Selection.AutoFill Destination:=Range("Y2:Y" & Range("C" & Rows.Count).End(xlUp).Row)
+    
+    
+    'FSO Complete in FSO Tracker
+    Range("AB2").Select
+    Selection.Value = "=VLOOKUP(C2,'FSO Tracker'!A:N,14,FALSE)" 'put vlookup formula here in between ""
+    Selection.AutoFill Destination:=Range("AB2:AB" & Range("C" & Rows.Count).End(xlUp).Row)
+    
+    'FSO Sent to County in FSO Tracker
+    Range("AE2").Select
+    Selection.Value = "=VLOOKUP(C2,'FSO Tracker'!A:O,15,FALSE)" 'put vlookup formula here in between ""
+    Selection.AutoFill Destination:=Range("AE2:AE" & Range("C" & Rows.Count).End(xlUp).Row)
+    
+    ' FSO Sent to County in FSO Tracker
+    Range("AH2").Select
+    Selection.Value = "=VLOOKUP(C2,'FSO Tracker'!A:P,16,FALSE)" 'put vlookup formula here in between ""
+    Selection.AutoFill Destination:=Range("AH2:AH" & Range("C" & Rows.Count).End(xlUp).Row)
+
+    
+    
+    'FSO Sent to County in Smart Sheets
+    'NO DATA IN SMART SHEETS FOR THIS COLUMN
+    
+   
+    'Sheets("Audit").Select
+    'Range("A1").Select
+    
+    Application.ScreenUpdating = True
+    
+    End Sub
+
+
+
+Sub RTRCheck_ODD()
+
+
+' RTR checks for vehicles
+'
+' Keyboard Shortcut: not assigned yet
+Application.ScreenUpdating = False
+'
+    Sheets("cCalRecycle_NorthBranch_DataMan").Select 'Put the name of your sheet here that you want this macro to work in
+    Cells.Select
+    With Selection.Interior
+        .Pattern = xlNone
+    End With
+    With Selection.Font
+        .ColorIndex = xlAutomatic
+    End With
+
+
+
+Dim currentColumn As Integer
+Dim columnHeading As String
+
+For currentColumn = ActiveSheet.UsedRange.Columns.Count To 1 Step -1
+    columnHeading = ActiveSheet.UsedRange.Cells(1, currentColumn).Value
+
+'Check whether to preserve the column
+    Select Case columnHeading
+    'Insert name of columns to preserve
+        Case "End Time", "Is Void", "Ticket Notes", "Zone Name", "Service Code", "Unit Count", "Disposal Monitor Name", _
+  "Addr No", "Addr St", "Ticket Number"
+        
+            'Do nothing
+        Case Else
+            'Delete the columns not wanted/ listed above
+            ActiveSheet.Columns(currentColumn).Delete
+        End Select
+    Next
+    
+      'List the column headers in the end result order you want to keep them.
+  arrColOrder = Array("Zone Name", "End Time", "Is Void", "Ticket Notes", "Service Code", "Unit Count", "Disposal Monitor Name", _
+  "Addr No", "Addr St", "Ticket Number")
+ 
+  counter = 1
+ 
+ 'LOOPS THAT MOVES COLUMNS AROUND BY ABOVE CODE SO THEY APPEAR IN THE ORDER YOU SPECIFIED.
+  For ndx = LBound(arrColOrder) To UBound(arrColOrder)
+ 
+  Set Found = Rows("1:1").Find(arrColOrder(ndx), LookIn:=xlValues, LookAt:=xlWhole, _
+  SearchOrder:=xlByColumns, SearchDirection:=xlNext, MatchCase:=False)
+ 
+  If Not Found Is Nothing Then
+  If Found.Column <> counter Then
+  Found.EntireColumn.Cut
+  Columns(counter).Insert Shift:=xlToRight
+  Application.CutCopyMode = False
+  End If
+  counter = counter + 1
+  End If
+ 
+  Next ndx
+ 
+    '.Select
+    'Cells.EntireColumn.AutoFit
+    
+    
+    'APN fixing for dashes
+    Range("L2").Select
+    Selection.Formula = "=REPLACE(REPLACE(A2,4,0,""-""),8,0,""-"")" 'Put replace formula here ""
+    Selection.AutoFill Destination:=Range("L2:L" & Range("A" & Rows.Count).End(xlUp).Row)
+    'Range(Selection, Selection.End(xlDown)).Select
+    
+
+    
+        'APN fixing for adding -000
+    Range("M2").Select
+    Selection.Formula = "=L2 & ""-000"" "   'Put the add text formula here ""
+    Selection.AutoFill Destination:=Range("M2:M" & Range("A" & Rows.Count).End(xlUp).Row)
+    'Range(Selection, Selection.End(xlDown)).Select
+    
+
+    Sheets("Audit for Odd APNs").Select
+    
+    'SUM up all RTR tickets to check RTR Erosion Control Ticket
+    Range("I2").Select
+    Selection.Value = "=SUMIF(DataMan!A:F,'Audit for Odd APNs'!B2,DataMan!F:F)" 'PUT FORMULA BETWEEN ""
+    Selection.AutoFill Destination:=Range("I2:I" & Range("C" & Rows.Count).End(xlUp).Row)
+    
+    'Puting RTR dates on the audit check
+    Range("J2").Select
+    Selection.Value = "=VLOOKUP(B2,DataMan!A:B,2,FALSE)" 'put vlookup formula here in between ""
+    Selection.AutoFill Destination:=Range("J2:J" & Range("C" & Rows.Count).End(xlUp).Row)
+    Range(Selection, Selection.End(xlDown)).Select
+    
+    
+    'Sheets("cCalRecycle_NorthBranch_DataMan").Select
+    '("A1").Select
+    
+    
+    
+    
+    
+    
+End Sub
+
+
+Sub MATCHING_ODD()
+
+
+
+Sheets("Audit for Odd APNs").Select 'select the sheet you want to format
+
+
+
+
+    ' Date in Hydro-mulch or waddle comlumns. But no RTR data
+    'Range("K2").Select
+   ' Selection.Value = "" 'put vlookup formula here in between ""
+    'Selection.AutoFill Destination:=Range("K2:K" & Range("C" & Rows.Count).End(xlUp).Row)
+    
+    
+    
+    ' Hydromulch Date matches
+    Range("N2").Select
+    Selection.Value = "=M2=L2" 'put vlookup formula here in between ""
+    Selection.AutoFill Destination:=Range("N2:N" & Range("C" & Rows.Count).End(xlUp).Row)
+    
+    
+    
+    ' Wattles Date matches
+    Range("Q2").Select
+    Selection.Value = "=P2=O2" 'put vlookup formula here in between ""
+    Selection.AutoFill Destination:=Range("Q2:Q" & Range("C" & Rows.Count).End(xlUp).Row)
+    
+    
+    ' Erosion Control Waiver Date matches
+    Range("T2").Select
+    Selection.Value = "=S2=R2" 'put vlookup formula here in between ""
+    Selection.AutoFill Destination:=Range("T2:T" & Range("C" & Rows.Count).End(xlUp).Row)
+    
+    
+    ' Haz Trees matches
+    Range("W2").Select
+    Selection.Value = "=V2=U2" 'put vlookup formula here in between ""
+    Selection.AutoFill Destination:=Range("W2:W" & Range("C" & Rows.Count).End(xlUp).Row)
+    
+    
+    ' ----------------------------------------------WORK IT
+    ' Soil Results  in Smart Sheets
+    'Range("Z2").Select
+    'Selection.Value = "=S2=R2" 'put vlookup formula here in between ""
+    '.AutoFill Destination:=Range("Z2:Z" & Range("C" & Rows.Count).End(xlUp).Row)
+    '--------------------------------------------------------------------------------------
+    
+    
+    ' FSO Complete Date matches
+    Range("AC2").Select
+    Selection.Value = "=AB2=AA2" 'put vlookup formula here in between ""
+    Selection.AutoFill Destination:=Range("AC2:AC" & Range("C" & Rows.Count).End(xlUp).Row)
+    
+    ' FSO Sent to County Date matches
+    Range("AF2").Select
+    Selection.Value = "=AE2=AD2" 'put vlookup formula here in between ""
+    Selection.AutoFill Destination:=Range("AF2:AF" & Range("C" & Rows.Count).End(xlUp).Row)
+    
+    
+    
+
+End Sub
+
+
+
