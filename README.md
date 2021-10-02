@@ -1,4 +1,5 @@
 # Work_Projects
- Moving to eliminate VBA entirely. 
- 
- Past works using VBA, and will soon transition to python or other languages
+Worked on varilies applicationg to help cowrkers with audits, develope SOPs with teachable QC created sofware.
+
+
+# Website of disaters by years(W.I.P)
