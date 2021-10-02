@@ -65,23 +65,28 @@ st.dataframe(df_selection)
 
 st.markdown("---")
 
-st.title("Total Disasters by Type in the USA")
+# st.title("Total Disasters by Type in the USA")
 
 # Key Performance Indicator's  (KPI's)
 st.subheader(f"You are viewing the following states: {State}")
 
-# by declaration
-# TODO: assign to a column-right side
+# our columns
+left_column, right_column = st.columns(2)
+
+# KPI: by declaration
 declaration_totals = df_selection['declaration_title'].value_counts()
-st.bar_chart(declaration_totals)
+# TODO: assign to a column-right side
+with right_column:
+    st.bar_chart(declaration_totals)
 
 st.markdown('---')
 
 
-# by Total incidents
-# TODO: assign to a column - left side
+# KPI by Total incidents
 incidents_total = df_selection['incident_type'].value_counts()
-st.bar_chart(incidents_total)
+# TODO: assign to a column - left side
+with left_column:
+    st.bar_chart(incidents_total)
 
 
 
