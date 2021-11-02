@@ -1,0 +1,206 @@
+Dim DBError As Boolean
+Dim BFIError As Boolean
+Dim OnSiteError As Boolean
+Dim SurveyQC As Boolean
+Dim APNError As Boolean
+Dim iFormError As Boolean
+
+Sub Surveys_Click()
+
+Call Initialize
+SelectDate = Range("D1")
+
+'Clean up existing data
+LastRow = ActiveSheet.Range("B1048576").End(xlUp).Row
+If Range("B5") > "" Then
+    With ActiveSheet.Range("B5:H" & LastRow)
+        .ClearContents
+        .Interior.Color = xlNone
+        .Borders.LineStyle = xlNone
+        .Font.Bold = False
+    End With
+End If
+ActiveSheet.Range("B4:H4").Interior.Color = xlNone
+
+Columns("LD:LE").EntireColumn.Delete
+Range("LE4") = "APN" ' Column #317
+Columns("G").HorizontalAlignment = xlCenter
+
+'Copy APN list from BFI
+APNRow = 5
+For Each Cell In Sheets(InitGlobal.BFITab).Range(Sheets(InitGlobal.BFITab).Cells(2, BFI_APN), Sheets(InitGlobal.BFITab).Cells(BFI_LastRow, BFI_APN))
+    BFICollectDate = Sheets(InitGlobal.BFITab).Range(Sheets(InitGlobal.BFITab).Cells(Cell.Row, BFI_CollectDate), Sheets(InitGlobal.BFITab).Cells(Cell.Row, BFI_CollectDate)).Value
+    If BFICollectDate = SelectDate Then
+        ActiveSheet.Range(Cells(APNRow, 317), Cells(APNRow, 317)).Value = Cell.Value
+        ActiveSheet.Range(Cells(APNRow, 316), Cells(APNRow, 316)).Value = "BFI"
+        APNRow = APNRow + 1
+    End If
+Next Cell
+    
+'Copy APN list from Dashboard
+For Each Cell In Sheets(InitGlobal.DBTab).Range(Sheets(InitGlobal.DBTab).Cells(2, DB_APN), Sheets(InitGlobal.DBTab).Cells(DB_LastRow, DB_APN))
+    DBSurveyDate = DashDate(Sheets(InitGlobal.DBTab).Range(Sheets(InitGlobal.DBTab).Cells(Cell.Row, DB_SurveyDate), Sheets(InitGlobal.DBTab).Cells(Cell.Row, DB_SurveyDate)).Value)
+    If Int(DBSurveyDate) = SelectDate Then
+        ActiveSheet.Range(Cells(APNRow, 317), Cells(APNRow, 317)).Value = Cell.Value
+        ActiveSheet.Range(Cells(APNRow, 316), Cells(APNRow, 316)).Value = "Dash"
+        APNRow = APNRow + 1
+    End If
+    Next Cell
+
+'Copy APN list from On-Site QC
+For Each Cell In Sheets(InitGlobal.OnSiteTab).Range(Sheets(InitGlobal.OnSiteTab).Cells(2, OnSite_APN), Sheets(InitGlobal.OnSiteTab).Cells(OnSite_LastRow, OnSite_APN))
+    OnSiteDate = Sheets(InitGlobal.OnSiteTab).Range(Sheets(InitGlobal.OnSiteTab).Cells(Cell.Row, OnSite_Date), Sheets(InitGlobal.OnSiteTab).Cells(Cell.Row, OnSite_Date)).Value
+    If OnSiteDate = SelectDate Then
+        ActiveSheet.Range(Cells(APNRow, 317), Cells(APNRow, 317)).Value = Cell.Value
+        ActiveSheet.Range(Cells(APNRow, 316), Cells(APNRow, 316)).Value = "OnSite"
+        APNRow = APNRow + 1
+    End If
+Next Cell
+
+'Copy APN list from Survey QC
+For Each Cell In Sheets(InitGlobal.SurveyTab).Range(Sheets(InitGlobal.SurveyTab).Cells(2, Survey_APN), Sheets(InitGlobal.SurveyTab).Cells(Survey_LastRow, Survey_APN))
+    SurveyDate = Sheets(InitGlobal.SurveyTab).Range(Sheets(InitGlobal.SurveyTab).Cells(Cell.Row, Survey_Date), Sheets(InitGlobal.SurveyTab).Cells(Cell.Row, Survey_Date)).Value
+    If SurveyDate = SelectDate Then
+        ActiveSheet.Range(Cells(APNRow, 317), Cells(APNRow, 317)).Value = Cell.Value
+        ActiveSheet.Range(Cells(APNRow, 316), Cells(APNRow, 316)).Value = "SurveyQC"
+        APNRow = APNRow + 1
+    End If
+Next Cell
+
+'Remove duplicate APNs, then sort & paste into Surveys column
+If ActiveSheet.Range("LE5") = "" Then Exit Sub ' No APN's found...nothing to do
+ActiveSheet.Range("LE4:LE" & ActiveSheet.Range("LE1048576").End(xlUp).Row).RemoveDuplicates Columns:=Array(1), Header:=xlYes
+LastRow = ActiveSheet.Range("LE1048576").End(xlUp).Row
+ActiveSheet.Range("LE4:LE" & LastRow).Sort Key1:=Range("LE4"), Order1:=xlAscending, Header:=xlYes
+ActiveSheet.Range("LE5:LE" & LastRow).Copy
+ActiveSheet.Range("B5").PasteSpecial Paste:=xlPasteValues
+ActiveSheet.Range("D1").Select
+
+APNError = False
+DBError = False
+BFIError = False
+iFormError = False
+OnSiteError = False
+SurveyQC = False
+
+'Add lookup info for each APN
+LastRow = ActiveSheet.Range("B1048576").End(xlUp).Row
+For Each Cell In ActiveSheet.Range("B5:B" & LastRow)
+    'Verify APN
+    If IsError(Application.VLookup(Cell.Value, Sheets(InitGlobal.BFITab).Range(Sheets(BFITab).Cells(2, BFI_APN), Sheets(BFITab).Cells(BFI_LastRow, BFI_LastCol)), 1, False)) Then
+        Cell.Font.Bold = True
+        Cell.Interior.Color = RGB(255, 0, 0)
+        APNError = True
+    Else
+        Cell.Offset(, 1).Value = Application.VLookup(Cell.Value, Sheets(InitGlobal.BFITab).Range(Sheets(BFITab).Cells(2, BFI_APN), Sheets(BFITab).Cells(BFI_LastRow, BFI_LastCol)), BFI_AddressNbr - BFI_APN + 1, False) & " " & _
+                                 Application.VLookup(Cell.Value, Sheets(InitGlobal.BFITab).Range(Sheets(BFITab).Cells(2, BFI_APN), Sheets(BFITab).Cells(BFI_LastRow, BFI_LastCol)), BFI_Street - BFI_APN + 1, False)
+    End If
+
+    'Dashboard
+    SurveyDate = DashDate(Application.VLookup(Cell.Value, Sheets(InitGlobal.DBTab).Range(Sheets(DBTab).Cells(2, DB_APN), Sheets(DBTab).Cells(DB_LastRow, DB_LastCol)), DB_SurveyDate - DB_APN + 1, False))
+    If IsError(SurveyDate) Then
+        SurveyDate = 0
+        Cell.Offset(, 2) = "No Record"
+        Cell.Offset(, 2).Font.Bold = True
+    End If
+    If SurveyDate = 0 Then
+        Cell.Offset(, 2).Interior.Color = RGB(255, 255, 153)
+        DBError = True
+    Else
+        Cell.Offset(, 2) = Int(SurveyDate)
+        If Int(SurveyDate) <> SelectDate Then
+            Cell.Offset(, 2).Interior.Color = RGB(255, 255, 153)
+            DBError = True
+        End If
+    End If
+    
+    'BFI
+    SurveyDate = Application.VLookup(Cell.Value, Sheets(InitGlobal.BFITab).Range(Sheets(BFITab).Cells(2, BFI_APN), Sheets(BFITab).Cells(BFI_LastRow, BFI_LastCol)), BFI_CollectDate - BFI_APN + 1, False)
+    If IsError(SurveyDate) Then
+        SurveyDate = 0
+        Cell.Offset(, 3) = "No Record"
+        Cell.Offset(, 3).Font.Bold = True
+    End If
+    If SurveyDate = 0 Then
+        Cell.Offset(, 3).Interior.Color = RGB(255, 255, 153)
+        BFIError = True
+    Else
+        Cell.Offset(, 3) = Int(SurveyDate)
+        If Int(SurveyDate) <> SelectDate Then
+            Cell.Offset(, 3).Interior.Color = RGB(255, 255, 153)
+            BFIError = True
+        End If
+    End If
+    
+   'iForm
+    With Sheets(InitGlobal.iFSurveyTab)
+     Cell.Offset(, 4) = WorksheetFunction.CountIfs(.Range(Sheets(iFSurveyTab).Cells(2, iFSurvey_APN), .Cells(iFSurvey_LastRow, iFSurvey_APN)), Cell.Value, _
+                                                   .Range(Sheets(iFSurveyTab).Cells(2, iFSurvey_Date), .Cells(iFSurvey_LastRow, iFSurvey_Date)), ActiveSheet.Range("D1"))
+    End With
+    If Cell.Offset(, 4) <> 1 Then
+        Cell.Offset(, 4).Interior.Color = RGB(255, 255, 153)
+        iFormError = True
+    End If
+    
+    'On-Site QC
+    With Sheets(InitGlobal.OnSiteTab)
+        Cell.Offset(, 5) = WorksheetFunction.CountIfs(.Range(Sheets(OnSiteTab).Cells(2, OnSite_APN), .Cells(OnSite_LastRow, OnSite_APN)), Cell.Value, _
+                                                      .Range(Sheets(OnSiteTab).Cells(2, OnSite_Complete), .Cells(OnSite_LastRow, OnSite_Complete)), "TRUE", _
+                                                      .Range(Sheets(OnSiteTab).Cells(2, OnSite_Date), .Cells(OnSite_LastRow, OnSite_Date)), ActiveSheet.Range("D1"))
+        If Cell.Offset(, 5) <> 1 Then
+            Cell.Offset(, 5).Interior.Color = RGB(255, 255, 153)
+            OnSiteError = True
+            If Cell.Offset(, 5) = 0 Then
+                If WorksheetFunction.CountIfs(.Range(Sheets(OnSiteTab).Cells(2, OnSite_APN), .Cells(OnSite_LastRow, OnSite_APN)), Cell.Value, _
+                                              .Range(Sheets(OnSiteTab).Cells(2, OnSite_Date), .Cells(OnSite_LastRow, OnSite_Date)), ActiveSheet.Range("D1")) = 1 Then
+                    Cell.Offset(, 5) = "Incomplete - " & Application.VLookup(Cell.Value, Sheets(OnSiteTab).Range(Sheets(OnSiteTab).Cells(2, OnSite_APN), Sheets(OnSiteTab).Cells(OnSite_LastRow, OnSite_LastCol)), OnSite_QC - OnSite_APN + 1, False)
+                    Cell.Offset(, 5).HorizontalAlignment = xlHAlignGeneral
+                    Cell.Offset(, 5).Font.Bold = True
+                End If
+            End If
+        End If
+    End With
+    
+     'Survey QC
+    With Sheets(InitGlobal.SurveyTab)
+     Cell.Offset(, 6) = WorksheetFunction.CountIfs(.Range(Sheets(SurveyTab).Cells(2, Survey_APN), .Cells(Survey_LastRow, Survey_APN)), Cell.Value, _
+                                                   .Range(Sheets(SurveyTab).Cells(2, Survey_Date), .Cells(Survey_LastRow, Survey_Date)), ActiveSheet.Range("D1"))
+    End With
+    If Cell.Offset(, 6) <> 1 Then
+        Cell.Offset(, 6).Interior.Color = RGB(255, 255, 153)
+        SurveyQCError = True
+    End If
+    
+Next Cell
+
+If APNError Then Range("B4").Interior.Color = RGB(255, 0, 0)
+If DBError Then Range("D4").Interior.Color = RGB(255, 255, 153)
+If BFIError Then Range("E4").Interior.Color = RGB(255, 255, 153)
+If iFormError Then Range("F4").Interior.Color = RGB(255, 255, 153)
+If OnSiteError Then Range("G4").Interior.Color = RGB(255, 255, 153)
+If SurveyQCError Then Range("H4").Interior.Color = RGB(255, 255, 153)
+
+'Put borders around used cells
+LastRow = ActiveSheet.Range("B1048576").End(xlUp).Row
+ActiveSheet.Range("B5:H" & LastRow).Borders.LineStyle = xlContinuous
+
+'Put heavier borders around duplicated base APN's
+LastRow = ActiveSheet.Range("B1048576").End(xlUp).Row
+LastBaseAPN = ""
+FirstRow = 0
+For Each Cell In ActiveSheet.Range("B5:B" & LastRow)
+    If Left(Cell.Value, 11) <> LastBaseAPN Then
+        If FirstRow > 0 And FirstRow <> Cell.Row - 1 Then
+            ActiveSheet.Range(Cells(FirstRow, Cell.Column), Cells(Cell.Row - 1, Cell.Column + 6)).BorderAround Weight:=xlMedium
+        End If
+        LastBaseAPN = Left(Cell.Value, 11)
+        FirstRow = Cell.Row
+    End If
+Next Cell
+If FirstRow > 0 And FirstRow <> LastRow Then
+    ActiveSheet.Range(Cells(FirstRow, 2), Cells(LastRow, 8)).BorderAround Weight:=xlMedium
+End If
+
+
+
+End Sub
